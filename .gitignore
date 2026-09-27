@@ -7,17 +7,22 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
 *.local
 
-<<<<<<< HEAD
+# Environment variables
+# .env contiene credenciales y NO debe subirse a Git
+.env
+.env.*
+!.env.example
+
 # Gatsby files
 .cache/
-# Comment in the public line in if your project uses Gatsby and not Next.js
-# https://nextjs.org/blog/next-9-1#public-directory-support
-# public
 
 # vuepress build output
 .vuepress/dist
@@ -25,13 +30,13 @@ dist-ssr
 # vuepress v2.x temp directory
 .temp
 
-# Sveltekit cache directory
+# SvelteKit cache directory
 .svelte-kit/
 
-# vitepress build output
+# VitePress build output
 **/.vitepress/dist
 
-# vitepress cache directory
+# VitePress cache directory
 **/.vitepress/cache
 
 # Docusaurus cache and generated files
@@ -58,7 +63,7 @@ dist-ssr
 # pnpm
 .pnpm-store
 
-# yarn v3
+# Yarn v3
 .pnp.*
 .yarn/*
 !.yarn/patches
@@ -75,7 +80,7 @@ vite.config.ts.timestamp-*
 # Windows
 desktop.ini
 Thumbs.db
-=======
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -86,4 +91,3 @@ Thumbs.db
 *.njsproj
 *.sln
 *.sw?
->>>>>>> dev
