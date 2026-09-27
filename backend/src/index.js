@@ -1,7 +1,10 @@
 const express = require("express");
+const cors = require('cors');
 const matchRoutes = require('./routes/matchRoutes');
 
 const app = express();
+
+app.use(cors()); 
 const port = process.env.PORT || 3000;
 
 // Middleware
