@@ -1,14 +1,20 @@
 const express = require("express");
+const matchRoutes = require('./routes/matchRoutes');
 
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Middleware
 app.use(express.json());
 
-app.get("/", (request, response) => {
-	response.json({ message: "Backend funcionando" });
+// Rutas
+app.use('/api/match', matchRoutes);
+
+app.get("/", (req, res) => {
+	res.json({ message: "Backend funcionando" });
 });
 
-app.listen(port, () => {
-	console.log(`Backend ejecutandose en http://localhost:${port}`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });
