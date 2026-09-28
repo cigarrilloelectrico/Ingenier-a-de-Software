@@ -1,15 +1,13 @@
 import { validarFechaRecepcion } from '../utils/validacionesObjeto.js'
+import { crearObjeto } from '../models/objetoModel.js'
 
 const registrarObjeto = async (datosObjeto) => {
   validarFechaRecepcion(datosObjeto.fechaRecepcion)
 
-  const objeto = {
-    ...datosObjeto,
-    estado: 'disponible',
-  }
+  const objeto = crearObjeto(datosObjeto)
 
-  // La persistencia se implementará cuando se confirme
-  // la estructura de PostgreSQL.
+  // La persistencia en PostgreSQL queda pendiente
+  // hasta conocer la estructura real de la base de datos.
   return objeto
 }
 
