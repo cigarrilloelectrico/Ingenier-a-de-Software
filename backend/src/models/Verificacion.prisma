@@ -1,0 +1,15 @@
+// Immutable record of the in-person check (RF23). Aviso and Objeto are reached through the citacion.
+model Verificacion {
+  verificacionId Int                   @id @default(autoincrement())
+  citacionId     Int                   @unique
+  funcionarioId  Int
+  antecedentes   String                @db.VarChar(1000)
+  resultado      ResultadoVerificacion
+  createdAt      DateTime              @default(now())
+
+  citacion    Citacion @relation(fields: [citacionId], references: [citacionId])
+  funcionario Usuario  @relation(fields: [funcionarioId], references: [usuarioId])
+
+  entrega Entrega?
+  strike  Strike?
+}

@@ -1,0 +1,10 @@
+// Final and irreversible (RF24); only from a verificacion with resultado = Acreditada.
+model Entrega {
+  entregaId      Int      @id @default(autoincrement())
+  verificacionId Int      @unique
+  funcionarioId  Int
+  createdAt      DateTime @default(now())
+
+  verificacion Verificacion @relation(fields: [verificacionId], references: [verificacionId])
+  funcionario  Usuario      @relation(fields: [funcionarioId], references: [usuarioId])
+}
