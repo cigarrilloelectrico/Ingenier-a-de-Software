@@ -1,61 +1,57 @@
-const { mockAvisos, mockObjetos } = require('../../mockData');
+const calcularPuntajeFecha = (fechaHallazgo, fechaPerdida) => {
+  const f1 = new Date(fechaHallazgo);
+  const f2 = new Date(fechaPerdida);
 
-const calcularCoincidencias = (idObjetoEncontrado) => {
-  const objeto = mockObjetos.find(obj => obj.id === idObjetoEncontrado);
-  if (!objeto) throw new Error('Objeto no encontrado en el inventario');
+  const difMilisegundos = Math.abs(f1 - f2);
+  const difDias = Math.floor(difMilisegundos / (1000 * 60 * 60 * 24));
 
-  const fechaHallazgo = new Date(objeto.fecha_hallazgo);
+  if (difDias === 0) return { puntos: 20, coincide: true, detalle: "Mismo día" };
+  if (difDias <= 3)  return { puntos: 15, coincide: true, detalle: `Diferencia de ${difDias} día(s)` };
+  if (difDias <= 7)  return { puntos: 10, coincide: true, detalle: `Diferencia de ${difDias} días` };
+  
+  return { puntos: 0, coincide: false, detalle: "Más de una semana de diferencia" };
+};
 
-  // Filtro estricto de avisos
-  const avisosValidos = mockAvisos.filter(aviso => {
-    if (aviso.estado !== 'publicado') return false;
+const calcularCoincidencias = (objetoBuscado, listaAvisos) => {
+  const avisosValidos = listaAvisos.filter(aviso => {
+    if (aviso.estado !== 'publicado') return false; 
+    const fechaHallazgo = new Date(objetoBuscado.fecha_hallazgo);
     const fechaPerdida = new Date(aviso.fecha_perdida);
-    return fechaPerdida <= fechaHallazgo;
+    if (fechaPerdida > fechaHallazgo) return false;
+
+    return true;
   });
 
-  // Sistema de Score (100 pts)
-  const resultados = avisosValidos.map(aviso => {
-    let score = 0;
-    
-    // Tipo de Objeto (35 Puntos)
-    if (aviso.id_tipo_objeto === objeto.id_tipo_objeto) {
-      score += 35;
-    }
+  return avisosValidos.map(aviso => {
+    const coincideTipo = aviso.id_tipo_objeto === objetoBuscado.id_tipo_objeto;
+    const puntosTipo = coincideTipo ? 40 : 0;
 
-    // Sede de Hallazgo (25 Puntos)
-    if (aviso.id_sede === objeto.id_sede) {
-      score += 25;
-    }
+    const coincideUbicacion = aviso.id_sede === objetoBuscado.id_sede;
+    const puntosUbicacion = coincideUbicacion ? 25 : 0;
 
-    // Color (15 Puntos)
-    if (aviso.color.toLowerCase() === objeto.color.toLowerCase()) {
-      score += 15;
-    }
+    const coincideColor = aviso.color?.toLowerCase() === objetoBuscado.color?.toLowerCase();
+    const puntosColor = coincideColor ? 15 : 0;
 
-    // Proximidad de Fecha (25, 15, 5 Puntos)
-    const fechaPerdida = new Date(aviso.fecha_perdida);
-    const diferenciaMilisegundos = Math.abs(fechaHallazgo - fechaPerdida);
-    const diferenciaDias = Math.ceil(diferenciaMilisegundos / (1000 * 60 * 60 * 24));
+    const resFecha = calcularPuntajeFecha(objetoBuscado.fecha_hallazgo, aviso.fecha_perdida);
 
-    if (diferenciaDias === 0) {
-      score += 25; // Mismo día
-    } else if (diferenciaDias <= 3) {
-      score += 15; // Entre 1 y 3 días
-    } else {
-      score += 5;  // Más de 3 días
-    }
+    const scoreTotal = puntosTipo + puntosUbicacion + puntosColor + resFecha.puntos;
 
-    return { 
-      aviso_id: aviso.id, 
-      porcentaje_match: score,
-      detalles: aviso 
+    let nivel = "BAJA";
+    if (scoreTotal >= 80) nivel = "ALTA";
+    else if (scoreTotal >= 50) nivel = "MEDIA";
+
+    return {
+      avisoId: aviso.id,
+      scoreTotal,
+      nivelCoincidencia: nivel,
+      desglose: {
+        tipo: { puntos: puntosTipo, maxPuntos: 40, coincide: coincideTipo },
+        ubicacion: { puntos: puntosUbicacion, maxPuntos: 25, coincide: coincideUbicacion },
+        color: { puntos: puntosColor, maxPuntos: 15, coincide: coincideColor },
+        fecha: { puntos: resFecha.puntos, maxPuntos: 20, coincide: resFecha.coincide, detalle: resFecha.detalle }
+      }
     };
-  });
-
-  // Ordenar de mayor a menor y limitar a los 20 resultados
-  return resultados
-    .sort((a, b) => b.porcentaje_match - a.porcentaje_match)
-    .slice(0, 20);
+  }).sort((a, b) => b.scoreTotal - a.scoreTotal);
 };
 
 module.exports = { calcularCoincidencias };
