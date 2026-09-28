@@ -4,37 +4,35 @@ const calcularCoincidencias = (idObjetoEncontrado) => {
   const objeto = mockObjetos.find(obj => obj.id === idObjetoEncontrado);
   if (!objeto) throw new Error('Objeto no encontrado en el inventario');
 
-  // Convertimos la fecha de hallazgo una sola vez para optimizar
   const fechaHallazgo = new Date(objeto.fecha_hallazgo);
 
-  // 1. Filtro estricto: Solo avisos activos cuya fecha de pérdida no sea en el futuro respecto al hallazgo
+  // Filtro estricto de avisos
   const avisosValidos = mockAvisos.filter(aviso => {
     if (aviso.estado !== 'publicado') return false;
     const fechaPerdida = new Date(aviso.fecha_perdida);
-    return fechaPerdida <= fechaHallazgo; // No puede perderse después de ser encontrado
+    return fechaPerdida <= fechaHallazgo;
   });
 
-  // 2. Sistema de Scoring (Max 100 pts)
+  // Sistema de Score (100 pts)
   const resultados = avisosValidos.map(aviso => {
     let score = 0;
     
-    // Ponderación 1: Tipo de Objeto (35 Puntos)
+    // Tipo de Objeto (35 Puntos)
     if (aviso.id_tipo_objeto === objeto.id_tipo_objeto) {
       score += 35;
     }
 
-    // Ponderación 2: Sede de Hallazgo (25 Puntos)
+    // Sede de Hallazgo (25 Puntos)
     if (aviso.id_sede === objeto.id_sede) {
       score += 25;
     }
 
-    // Ponderación 3: Color (15 Puntos)
-    // Usamos toLowerCase() para evitar errores por mayúsculas/minúsculas
+    // Color (15 Puntos)
     if (aviso.color.toLowerCase() === objeto.color.toLowerCase()) {
       score += 15;
     }
 
-    // Ponderación 4: Proximidad de Fecha (25 Puntos escalonados)
+    // Proximidad de Fecha (25, 15, 5 Puntos)
     const fechaPerdida = new Date(aviso.fecha_perdida);
     const diferenciaMilisegundos = Math.abs(fechaHallazgo - fechaPerdida);
     const diferenciaDias = Math.ceil(diferenciaMilisegundos / (1000 * 60 * 60 * 24));
@@ -54,7 +52,7 @@ const calcularCoincidencias = (idObjetoEncontrado) => {
     };
   });
 
-  // 3. Ordenar de mayor a menor y truncar a 20 resultados
+  // Ordenar de mayor a menor y limitar a los 20 resultados
   return resultados
     .sort((a, b) => b.porcentaje_match - a.porcentaje_match)
     .slice(0, 20);

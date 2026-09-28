@@ -1,4 +1,3 @@
-// backend/controllers/matchController.js
 const matchService = require('../services/matchService');
 
 const getMatches = (req, res) => {
