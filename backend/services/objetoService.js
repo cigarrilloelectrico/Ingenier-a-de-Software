@@ -1,11 +1,7 @@
-import { esFechaFutura } from '../utils/validacionesObjeto.js'
+import { validarFechaRecepcion } from '../utils/validacionesObjeto.js'
 
 const registrarObjeto = async (datosObjeto) => {
-  if (esFechaFutura(datosObjeto.fechaRecepcion)) {
-    const error = new Error('La fecha de recepción no puede ser futura')
-    error.statusCode = 400
-    throw error
-  }
+  validarFechaRecepcion(datosObjeto.fechaRecepcion)
 
   const objeto = {
     ...datosObjeto,
