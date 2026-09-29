@@ -19,6 +19,7 @@ app.use(cors({
 app.use(express.json());
 app.use(cookieParser());
 app.use(morgan("dev"));
+app.use("/uploads", express.static("uploads"));
 
 app.get("/", (req, res) => {
   res.send("¡Bienvenido a la API de UBB Objetos Perdidos!");
@@ -26,7 +27,6 @@ app.get("/", (req, res) => {
 
 routerApi(app);
 
-// connectDB already stops the process if the connection fails
 await connectDB();
 app.listen(PORT, () => {
   console.log(`Servidor iniciado en ${HOST}:${PORT}`);
