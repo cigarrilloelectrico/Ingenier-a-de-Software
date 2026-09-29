@@ -58,3 +58,11 @@ export function subirFotos(req, res, next) {
     handleErrorClient(res, 400, ERRORES_MULTER[error.code] || error.message);
   });
 }
+
+// Sube 1 foto opcional en el campo "fotografia" para el aviso de pérdida (máx 5 MB, JPG o PNG)
+export function subirFotoAviso(req, res, next) {
+  uploadMiddleware.single("fotografia")(req, res, (error) => {
+    if (!error) return next();
+    handleErrorClient(res, 400, ERRORES_MULTER[error.code] || error.message);
+  });
+}
