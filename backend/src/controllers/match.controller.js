@@ -1,7 +1,7 @@
-const { calcularCoincidencias } = require('../services/matchService');
-const { mockAvisos, mockObjetos } = require('../../mockData'); // Importamos ambos
+import { calcularCoincidencias } from '../services/match.service.js';
+import { mockAvisos, mockObjetos } from '../../mockData.js';
 
-const getMatches = async (req, res, next) => {
+export const getMatches = async (req, res, next) => {
   try {
     const { id } = req.params;
     const targetId = parseInt(id);
@@ -26,5 +26,3 @@ const getMatches = async (req, res, next) => {
     next(error); 
   }
 };
-
-module.exports = { getMatches };

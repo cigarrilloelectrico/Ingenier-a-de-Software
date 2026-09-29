@@ -12,7 +12,7 @@ const calcularPuntajeFecha = (fechaHallazgo, fechaPerdida) => {
   return { puntos: 0, coincide: false, detalle: "Más de una semana de diferencia" };
 };
 
-const calcularCoincidencias = (objetoBuscado, listaAvisos) => {
+export const calcularCoincidencias = (objetoBuscado, listaAvisos) => {
   const avisosValidos = listaAvisos.filter(aviso => {
     if (aviso.estado !== 'publicado') return false; 
     const fechaHallazgo = new Date(objetoBuscado.fecha_hallazgo);
@@ -42,7 +42,10 @@ const calcularCoincidencias = (objetoBuscado, listaAvisos) => {
 
     return {
       avisoId: aviso.id,
+      aviso_id: aviso.id,
       scoreTotal,
+      porcentaje_match: scoreTotal,
+      detalles: aviso,
       nivelCoincidencia: nivel,
       desglose: {
         tipo: { puntos: puntosTipo, maxPuntos: 40, coincide: coincideTipo },
@@ -53,5 +56,3 @@ const calcularCoincidencias = (objetoBuscado, listaAvisos) => {
     };
   }).sort((a, b) => b.scoreTotal - a.scoreTotal);
 };
-
-module.exports = { calcularCoincidencias };

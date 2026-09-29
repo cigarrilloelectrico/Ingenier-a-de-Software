@@ -1,0 +1,25 @@
+model Objeto {
+  objetoId          Int          @id @default(autoincrement())
+  // Recinto where the object is kept (the funcionario's recinto)
+  recintoId         Int
+  recintoHallazgoId Int
+  tipoObjetoId      Int
+  registradoPorId   Int
+  color             String       @db.VarChar(40)
+  descripcion       String       @db.VarChar(500)
+  fechaRecepcion    DateTime     @db.Date
+  entregadoPor      String?      @db.VarChar(120)
+  estado            EstadoObjeto @default(Disponible)
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  recinto         Recinto    @relation("ObjetoCustodia", fields: [recintoId], references: [recintoId])
+  recintoHallazgo Recinto    @relation("ObjetoHallazgo", fields: [recintoHallazgoId], references: [recintoId])
+  tipoObjeto      TipoObjeto @relation(fields: [tipoObjetoId], references: [tipoObjetoId])
+  registradoPor   Usuario    @relation(fields: [registradoPorId], references: [usuarioId])
+
+  fotos      ObjetoFoto[]
+  citaciones Citacion[]
+
+  @@index([recintoId, estado])
+}

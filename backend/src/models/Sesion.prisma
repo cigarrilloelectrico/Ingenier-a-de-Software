@@ -1,0 +1,15 @@
+// Server-side sessions so they can be revoked remotely (RF5, RF28, RF37, RF47).
+model Sesion {
+  sesionId          Int       @id @default(autoincrement())
+  usuarioId         Int
+  tokenHash         String    @unique @db.VarChar(255)
+  // Expires after 30 minutes of inactivity or 12 hours after login (RF4)
+  ultimaActividadAt DateTime
+  expiraAt          DateTime
+  cerradaAt         DateTime?
+  createdAt         DateTime  @default(now())
+
+  usuario Usuario @relation(fields: [usuarioId], references: [usuarioId])
+
+  @@index([usuarioId])
+}

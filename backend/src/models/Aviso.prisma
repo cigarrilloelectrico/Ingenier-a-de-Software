@@ -1,0 +1,30 @@
+// Content is immutable once published (RF10), so updatedAt is the date of the last state change (RF13).
+model Aviso {
+  avisoId          Int           @id @default(autoincrement())
+  alumnoId         Int
+  tipoObjetoId     Int
+  recintoId        Int
+  avisoCorregidoId Int?          @unique
+  color            String        @db.VarChar(40)
+  descripcion      String        @db.VarChar(500)
+  fechaPerdida     DateTime      @db.Date
+  fotoUrl          String?       @db.VarChar(255)
+  estado           EstadoAviso   @default(Publicado)
+  motivoCierre     MotivoCierre?
+  comentarioCierre String?       @db.VarChar(200)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  alumno         Usuario    @relation(fields: [alumnoId], references: [usuarioId])
+  tipoObjeto     TipoObjeto @relation(fields: [tipoObjetoId], references: [tipoObjetoId])
+  recinto        Recinto    @relation(fields: [recintoId], references: [recintoId])
+  // Previous aviso that this one corrects (RF10)
+  avisoCorregido Aviso?     @relation("AvisoCorreccion", fields: [avisoCorregidoId], references: [avisoId])
+  correccion     Aviso?     @relation("AvisoCorreccion")
+
+  citaciones     Citacion[]
+  notificaciones Notificacion[]
+
+  @@index([alumnoId])
+  @@index([estado])
+}

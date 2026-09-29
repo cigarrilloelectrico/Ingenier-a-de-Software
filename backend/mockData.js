@@ -1,4 +1,4 @@
-const mockAvisos = [
+export const mockAvisos = [
   // 1. El caso intermedio (90%)
   { id: 1, id_tipo_objeto: 3, color: 'Negro', id_sede: 1, fecha_perdida: '2026-09-25', estado: 'publicado' },
   
@@ -18,8 +18,6 @@ const mockAvisos = [
   { id: 6, id_tipo_objeto: 8, color: 'Rojo', id_sede: 1, fecha_perdida: '2026-09-26', estado: 'publicado' }
 ];
 
-const mockObjetos = [
+export const mockObjetos = [
   { id: 101, id_tipo_objeto: 3, color: 'Negro', id_sede: 1, fecha_hallazgo: '2026-09-26' }
 ];
-
-module.exports = { mockAvisos, mockObjetos };
