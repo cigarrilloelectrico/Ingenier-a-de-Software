@@ -144,3 +144,6 @@ vite.config.ts.timestamp-*
 
 # Prisma generated client (run `npm run db:generate` in backend/)
 backend/src/generated/
+
+# Files uploaded by users (photos)
+backend/uploads/
