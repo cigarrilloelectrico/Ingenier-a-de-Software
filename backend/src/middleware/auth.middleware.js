@@ -11,7 +11,7 @@ export const hashToken = (token) => createHash("sha256").update(token).digest("h
  * Verifies the JWT in the `accessToken` cookie and that its session is still alive in the database.
  * The database check is what allows closing sessions remotely (RF5, RF28, RF37, RF47)
  * and expiring them after 30 minutes of inactivity (RF4).
- * On success sets `req.user = { usuarioId, rol, sesionId }`.
+ * On success sets `req.user = { usuarioId, rol, recintoId, sesionId }` (recintoId is only set for funcionarios).
  */
 export const authMiddleware = async (req, res, next) => {
   const token = req.cookies?.accessToken;
@@ -29,7 +29,7 @@ export const authMiddleware = async (req, res, next) => {
 
   const sesion = await prisma.sesion.findUnique({
     where: { sesionId: payload.sesionId },
-    include: { usuario: { select: { usuarioId: true, rol: true, estado: true } } },
+    include: { usuario: { select: { usuarioId: true, rol: true, estado: true, recintoId: true } } },
   });
 
   const now = new Date();
@@ -56,6 +56,7 @@ export const authMiddleware = async (req, res, next) => {
   req.user = {
     usuarioId: sesion.usuario.usuarioId,
     rol: sesion.usuario.rol,
+    recintoId: sesion.usuario.recintoId,
     sesionId: sesion.sesionId,
   };
   next();
