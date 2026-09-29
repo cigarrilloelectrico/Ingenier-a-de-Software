@@ -13,7 +13,6 @@ export function routerApi(app) {
 
   router.use("/inventario", inventarioRouter);
   router.use("/recintos", recintoRouter);
-  // Sin authMiddleware mientras el cruce de coincidencias (RF20) use mockData; al conectarlo a la base debe quedar solo para funcionarios
   router.use("/match", matchRouter);
 
   app.use("/api", router);

@@ -9,8 +9,10 @@ import { routerApi } from "./src/routes/index.routes.js";
 
 const app = express();
 
-const allowedOrigins = ["http://localhost:5173"];
-if (process.env.CORS_ORIGIN) allowedOrigins.push(process.env.CORS_ORIGIN);
+const allowedOrigins = (process.env.CORS_ORIGIN || "http://localhost:5173")
+  .split(',')
+  .map(origin => origin.trim())
+  .filter(Boolean);
 
 app.use(cors({
   origin: allowedOrigins,
