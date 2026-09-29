@@ -1,0 +1,13 @@
+// Only from a verificacion with resultado = NoAcreditada (RF25). Never edited or deleted:
+// unlocking the account (RF41) sets vigente = false so the counter resets but history stays.
+model Strike {
+  strikeId       Int      @id @default(autoincrement())
+  verificacionId Int      @unique
+  funcionarioId  Int
+  motivo         String   @db.VarChar(500)
+  vigente        Boolean  @default(true)
+  createdAt      DateTime @default(now())
+
+  verificacion Verificacion @relation(fields: [verificacionId], references: [verificacionId])
+  funcionario  Usuario      @relation(fields: [funcionarioId], references: [usuarioId])
+}

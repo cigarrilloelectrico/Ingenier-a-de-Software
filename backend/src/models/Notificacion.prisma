@@ -1,0 +1,17 @@
+// In-app notification for alumnos (RF30) and funcionarios (RF19, tipo NuevoAviso), also sent by email.
+// The message text is derived from `tipo`, so it can never describe the found object.
+model Notificacion {
+  notificacionId  Int              @id @default(autoincrement())
+  usuarioId       Int
+  avisoId         Int?
+  tipo            TipoNotificacion
+  leida           Boolean          @default(false)
+  // Null while the email is pending or failed, so it can be retried
+  correoEnviadoAt DateTime?
+  createdAt       DateTime         @default(now())
+
+  usuario Usuario @relation(fields: [usuarioId], references: [usuarioId])
+  aviso   Aviso?  @relation(fields: [avisoId], references: [avisoId])
+
+  @@index([usuarioId, leida])
+}

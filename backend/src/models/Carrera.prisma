@@ -1,0 +1,9 @@
+model Carrera {
+  carreraId Int            @id @default(autoincrement())
+  nombre    String         @unique @db.VarChar(100)
+  estado    EstadoCatalogo @default(Activo)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  alumnos Usuario[]
+}
