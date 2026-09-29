@@ -2,6 +2,7 @@ import multer from "multer";
 import fs from "node:fs";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
+import { handleErrorClient } from "../handlers/responseHandlers.js";
 
 // Carpeta backend/uploads, sin importar desde dónde se ejecute el servidor
 export const UPLOADS_DIR = path.join(import.meta.dirname, "../../uploads");
@@ -42,3 +43,18 @@ const uploadMiddleware = multer({
 });
 
 export default uploadMiddleware;
+
+// Mensajes en español para los errores propios de multer
+const ERRORES_MULTER = {
+  LIMIT_FILE_SIZE: "Cada foto puede pesar como máximo 5 MB",
+  LIMIT_FILE_COUNT: "Puedes subir como máximo 5 fotos",
+  LIMIT_UNEXPECTED_FILE: "Puedes subir como máximo 5 fotos en el campo fotos",
+};
+
+// Sube hasta 5 fotos en el campo "fotos" y responde 400 si multer rechaza algún archivo
+export function subirFotos(req, res, next) {
+  uploadMiddleware.array("fotos", 5)(req, res, (error) => {
+    if (!error) return next();
+    handleErrorClient(res, 400, ERRORES_MULTER[error.code] || error.message);
+  });
+}
