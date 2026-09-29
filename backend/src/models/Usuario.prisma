@@ -1,0 +1,37 @@
+// Alumno, funcionario or administrador. recintoId is only set for funcionarios,
+// carreraId and fotoUrl only for alumnos.
+model Usuario {
+  usuarioId           Int           @id @default(autoincrement())
+  recintoId           Int?
+  carreraId           Int?
+  nombre              String?       @db.VarChar(60)
+  apellidos           String?       @db.VarChar(60)
+  rut                 String?       @unique @db.VarChar(12)
+  correo              String        @unique @db.VarChar(254)
+  fotoUrl             String?       @db.VarChar(255)
+  passwordHash        String?       @db.VarChar(255)
+  passwordTemporal    Boolean       @default(false)
+  passwordExpiredAt   DateTime?
+  rol                 Rol
+  estado              EstadoUsuario @default(NoVerificado)
+  segundoFactorActivo Boolean       @default(true)
+  intentosFallidos    Int           @default(0) @db.SmallInt
+  // 15-minute lock after 5 failed logins; unrelated to the strike lock in `estado`
+  bloqueoHastaAt      DateTime?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  recinto Recinto? @relation(fields: [recintoId], references: [recintoId])
+  carrera Carrera? @relation(fields: [carreraId], references: [carreraId])
+
+  avisos              Aviso[]
+  objetosRegistrados  Objeto[]
+  citaciones          Citacion[]
+  verificaciones      Verificacion[]
+  entregas            Entrega[]
+  strikesAsignados    Strike[]
+  notificaciones      Notificacion[]
+  bitacoras           Bitacora[]
+  codigosVerificacion CodigoVerificacion[]
+  sesiones            Sesion[]
+}

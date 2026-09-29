@@ -22,4 +22,4 @@ const mockObjetos = [
   { id: 101, id_tipo_objeto: 3, color: 'Negro', id_sede: 1, fecha_hallazgo: '2026-09-26' }
 ];
 
-module.exports = { mockAvisos, mockObjetos };
+export { mockAvisos, mockObjetos };

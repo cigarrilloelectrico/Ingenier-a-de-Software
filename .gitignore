@@ -24,3 +24,9 @@ frontend/.env
 *.njsproj
 *.sln
 *.sw?
+
+# Prisma generated client (run `npm run db:generate` in backend/)
+backend/src/generated/
+
+# Files uploaded by users (photos)
+backend/uploads/

@@ -21,4 +21,4 @@ const validarIdObjeto = (req, res, next) => {
   next();
 };
 
-module.exports = { validarIdObjeto };
+export { validarIdObjeto };

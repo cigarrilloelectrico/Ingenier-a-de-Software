@@ -1,0 +1,17 @@
+// Physical point on campus Concepción (e.g. AC, Gantes): where objects are lost,
+// found, kept in custody and picked up.
+model Recinto {
+  recintoId       Int            @id @default(autoincrement())
+  nombre          String         @unique @db.VarChar(80)
+  latitud         Decimal        @db.Decimal(9, 6)
+  longitud        Decimal        @db.Decimal(9, 6)
+  horarioAtencion String         @db.VarChar(150)
+  estado          EstadoCatalogo @default(Activo)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  funcionarios    Usuario[]
+  avisos          Aviso[]
+  objetosCustodia Objeto[]  @relation("ObjetoCustodia")
+  objetosHallazgo Objeto[]  @relation("ObjetoHallazgo")
+}

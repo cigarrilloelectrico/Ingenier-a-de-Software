@@ -1,0 +1,10 @@
+model ObjetoFoto {
+  objetoFotoId Int      @id @default(autoincrement())
+  objetoId     Int
+  fotoUrl      String   @db.VarChar(255)
+  createdAt    DateTime @default(now())
+
+  objeto Objeto @relation(fields: [objetoId], references: [objetoId])
+
+  @@index([objetoId])
+}

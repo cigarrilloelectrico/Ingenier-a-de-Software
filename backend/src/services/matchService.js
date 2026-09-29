@@ -1,4 +1,4 @@
-const { mockAvisos, mockObjetos } = require('../../mockData');
+import { mockAvisos, mockObjetos } from '../../mockData.js';
 
 const calcularCoincidencias = (idObjetoEncontrado) => {
   const objeto = mockObjetos.find(obj => obj.id === idObjetoEncontrado);
@@ -58,4 +58,4 @@ const calcularCoincidencias = (idObjetoEncontrado) => {
     .slice(0, 20);
 };
 
-module.exports = { calcularCoincidencias };
+export { calcularCoincidencias };

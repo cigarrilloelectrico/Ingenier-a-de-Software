@@ -1,0 +1,16 @@
+// 6-digit codes sent by email (RF2, RF4, RF5, RF46). Stored hashed, never in plain text.
+model CodigoVerificacion {
+  codigoVerificacionId Int             @id @default(autoincrement())
+  usuarioId            Int
+  codigoHash           String          @db.VarChar(255)
+  proposito            PropositoCodigo
+  intentos             Int             @default(0) @db.SmallInt
+  estado               EstadoCodigo    @default(Vigente)
+  expiraAt             DateTime
+  // Also used to enforce the limit of 3 codes per hour
+  createdAt            DateTime        @default(now())
+
+  usuario Usuario @relation(fields: [usuarioId], references: [usuarioId])
+
+  @@index([usuarioId, proposito, estado])
+}

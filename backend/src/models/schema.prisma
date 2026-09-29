@@ -1,0 +1,14 @@
+// Entry point of the Prisma schema. Every other .prisma file in this folder
+// (one per model, plus enums.prisma) is merged into it by the Prisma CLI.
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  runtime      = "nodejs"
+  moduleFormat = "esm"
+}
+
+// The connection URL lives in prisma.config.js (built from configEnv.js)
+datasource db {
+  provider = "postgresql"
+}

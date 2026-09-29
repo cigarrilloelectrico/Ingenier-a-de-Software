@@ -1,4 +1,4 @@
-const matchService = require('../services/matchService');
+import * as matchService from '../services/matchService.js';
 
 const getMatches = (req, res) => {
   try {
@@ -17,4 +17,4 @@ const getMatches = (req, res) => {
   }
 };
 
-module.exports = { getMatches };
+export { getMatches };

@@ -1,8 +1,9 @@
-const express = require('express');
-const router = express.Router();
-const { getMatches } = require('../controllers/matchController');
-const { validarIdObjeto } = require('../validations/matchValidation');
+import { Router } from 'express';
+import { getMatches } from '../controllers/matchController.js';
+import { validarIdObjeto } from '../validations/matchValidation.js';
+
+const router = Router();
 
 router.get('/:id', validarIdObjeto, getMatches);
 
-module.exports = router;
+export default router;
