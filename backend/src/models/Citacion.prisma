@@ -1,0 +1,23 @@
+// Associative table between Aviso and Objeto. The recinto is Objeto.recintoId (not duplicated).
+model Citacion {
+  citacionId      Int            @id @default(autoincrement())
+  avisoId         Int
+  objetoId        Int
+  funcionarioId   Int
+  tipo            TipoCitacion
+  // Required (min 20 chars) when tipo = Verificacion (RF22)
+  motivoEvidencia String?        @db.VarChar(500)
+  estado          EstadoCitacion @default(Vigente)
+  venceAt         DateTime?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  aviso       Aviso   @relation(fields: [avisoId], references: [avisoId])
+  objeto      Objeto  @relation(fields: [objetoId], references: [objetoId])
+  funcionario Usuario @relation(fields: [funcionarioId], references: [usuarioId])
+
+  verificacion Verificacion?
+
+  @@index([avisoId])
+  @@index([objetoId, estado])
+}

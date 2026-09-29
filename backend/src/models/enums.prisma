@@ -1,0 +1,91 @@
+enum Rol {
+  Alumno
+  Funcionario
+  Administrador
+}
+
+// Bloqueado = locked by 3 strikes until Rectoría unlocks it (RF28, RF41)
+enum EstadoUsuario {
+  NoVerificado
+  Activo
+  Bloqueado
+  Desactivado
+}
+
+// Shared by Recinto, Carrera and TipoObjeto: inactive entries leave the forms but are kept (RF34, RF44)
+enum EstadoCatalogo {
+  Activo
+  Inactivo
+}
+
+enum EstadoAviso {
+  Publicado
+  Citado
+  Entregado
+  Rechazado
+  Cerrado
+  Inactivo
+}
+
+enum MotivoCierre {
+  Recuperado
+  ErrorAlDeclarar
+}
+
+enum EstadoObjeto {
+  Disponible
+  Reservado
+  Entregado
+}
+
+enum TipoCitacion {
+  Retiro
+  Verificacion
+}
+
+enum EstadoCitacion {
+  Vigente
+  Resuelta
+  Caducada
+}
+
+enum ResultadoVerificacion {
+  Acreditada
+  NoAcreditada
+}
+
+enum TipoNotificacion {
+  Coincidencia
+  ListoParaRetiro
+  ReclamoRechazado
+  Strike
+  DatosCorregidos
+  NuevoAviso
+}
+
+enum TipoAccionBitacora {
+  CrearRecinto
+  EditarRecinto
+  DesactivarRecinto
+  ReactivarRecinto
+  CrearFuncionario
+  CambiarRecinto
+  DesactivarFuncionario
+  ReactivarFuncionario
+  CorregirDatosAlumno
+  DesbloquearAlumno
+  CambiarCatalogo
+}
+
+enum PropositoCodigo {
+  VerificarCorreo
+  SegundoFactor
+  RecuperarPassword
+  DesactivarSegundoFactor
+}
+
+enum EstadoCodigo {
+  Vigente
+  Usado
+  Invalidado
+}
