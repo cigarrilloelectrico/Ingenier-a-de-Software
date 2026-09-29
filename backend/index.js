@@ -26,7 +26,6 @@ app.get("/", (req, res) => {
 
 routerApi(app);
 
-// connectDB already stops the process if the connection fails
 await connectDB();
 app.listen(PORT, () => {
   console.log(`Servidor iniciado en ${HOST}:${PORT}`);
