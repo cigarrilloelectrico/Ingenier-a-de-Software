@@ -1,4 +1,5 @@
 import { Router } from "express";
+import inventarioRouter from "./inventario.routes.js";
 
 /**
  * Mounts every API router under /api.
@@ -7,6 +8,8 @@ import { Router } from "express";
  */
 export function routerApi(app) {
   const router = Router();
+
+  router.use("/inventario", inventarioRouter);
 
   app.use("/api", router);
 }
