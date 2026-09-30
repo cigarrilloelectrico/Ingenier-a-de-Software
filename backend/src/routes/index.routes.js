@@ -1,9 +1,9 @@
 import { Router } from "express";
+import authRouter from "./auth.routes.js";
 import inventarioRouter from "./inventario.routes.js";
 import recintoRouter from "./recinto.routes.js";
-import matchRouter from "./matchRoutes.js";
 import avisoRouter from "./aviso.routes.js";
-import authRouter from "./auth.routes.js";
+import matchRouter from "./match.routes.js";
 
 export function routerApi(app) {
   const router = Router();
