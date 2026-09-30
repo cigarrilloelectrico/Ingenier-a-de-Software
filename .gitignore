@@ -7,79 +7,12 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Dependencies
-node_modules/
-
-# Build output
-dist/
-dist-ssr/
+node_modules
+dist
+dist-ssr
 *.local
-
-# Environment variables
-# .env contiene credenciales y NO debe subirse a Git
-.env
-.env.*
-!.env.example
-
-# Gatsby files
-.cache/
-
-# vuepress build output
-.vuepress/dist
-
-# vuepress v2.x temp directory
-.temp
-
-# SvelteKit cache directory
-.svelte-kit/
-
-# VitePress build output
-**/.vitepress/dist
-
-# VitePress cache directory
-**/.vitepress/cache
-
-# Docusaurus cache and generated files
-.docusaurus
-
-# Serverless directories
-.serverless/
-
-# FuseBox cache
-.fusebox/
-
-# DynamoDB Local files
-.dynamodb/
-
-# Firebase cache directory
-.firebase/
-
-# TernJS port file
-.tern-port
-
-# Stores VSCode versions used for testing VSCode extensions
-.vscode-test
-
-# pnpm
-.pnpm-store
-
-# Yarn v3
-.pnp.*
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
-
-# Vite files
-vite.config.js.timestamp-*
-vite.config.ts.timestamp-*
-.vite/
-
-# Windows
-desktop.ini
-Thumbs.db
+backend/.env
+frontend/.env
 
 # Editor directories and files
 .vscode/*
@@ -92,5 +25,8 @@ Thumbs.db
 *.sln
 *.sw?
 
-# Prisma generated client
+# Prisma generated client (run `npm run db:generate` in backend/)
 backend/src/generated/
+
+# Files uploaded by users (photos)
+backend/uploads/
