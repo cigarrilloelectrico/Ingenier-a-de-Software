@@ -105,7 +105,7 @@ async function main() {
       recintoId: recinto.recintoId, color: 'Negro', descripcion: 'Teléfono con funda negra y rayón',
       fechaPerdida: new Date('2026-09-28'), estado: 'Publicado' },
   });
-  // Mismo tipo, otro color, 5 días antes: debe salir con 75 (MEDIA)
+  // Mismo tipo, otro color, 5 días antes, debe salir con 75 (MEDIA)
   await prisma.aviso.upsert({
     where: { avisoId: 9003 }, update: {},
     create: { avisoId: 9003, alumnoId: alumno.usuarioId, tipoObjetoId: tipoMochila.tipoObjetoId,
@@ -119,6 +119,14 @@ async function main() {
       tipoObjetoId: tipoMochila.tipoObjetoId, registradoPorId: funcionario.usuarioId,
       color: 'Azul', descripcion: 'Mochila azul reservada de prueba',
       fechaRecepcion: new Date('2026-09-28'), estado: 'Reservado' },
+  });
+  // Mismas señas, color y día que el objeto, debe quedar primero (95, ALTA)
+  await prisma.aviso.upsert({
+    where: { avisoId: 9004 }, update: {},
+    create: { avisoId: 9004, alumnoId: alumno.usuarioId, tipoObjetoId: tipoMochila.tipoObjetoId,
+      recintoId: recinto.recintoId, color: 'Negro',
+      descripcion: 'Mochila negra Targus con un llavero de Spider-Man y un parche',
+      fechaPerdida: new Date('2026-09-28'), estado: 'Publicado' },
   });
 
   console.log('✅ Datos de prueba cargados correctamente.');

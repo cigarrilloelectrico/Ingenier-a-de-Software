@@ -17,7 +17,7 @@ export const calcularCoincidencias = async (idObjeto) => {
     throw errorHttp(409, `El objeto no está disponible (estado: ${objeto.estado}).`);
   }
 
-  // Solo avisos del mismo tipo 
+  // Solo se puntúan avisos del mismo tipo
   const avisos = await prisma.aviso.findMany({
     where: {
       estado: 'Publicado',
@@ -29,6 +29,7 @@ export const calcularCoincidencias = async (idObjeto) => {
       tipoObjetoId: true,
       recintoId: true,
       color: true,
+      descripcion: true,
       fechaPerdida: true,
       estado: true,
     },
