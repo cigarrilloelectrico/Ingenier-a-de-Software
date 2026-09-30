@@ -1,10 +1,14 @@
 import { useInventario } from "../hooks/useInventario";
 import { useRecintos } from "../../../hooks/useRecintos";
 import ObjetoCard from "../components/ObjetoCard";
+import CampoSelect from "../../../components/CampoSelect";
+import CampoFecha from "../../../components/CampoFecha";
 
-const ESTILO_CAMPO =
-  "rounded-lg border border-slate-300 px-3 py-2 font-normal focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20";
-const ESTILO_ETIQUETA = "flex flex-col gap-1 text-sm font-medium text-slate-700";
+const OPCIONES_ESTADO = [
+  { valor: "Disponible", texto: "Disponible" },
+  { valor: "Reservado", texto: "Reservado" },
+  { valor: "Entregado", texto: "Entregado" },
+];
 const ESTILO_BOTON_PAGINA =
   "rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40";
 
@@ -15,12 +19,16 @@ export default function Inventario() {
     loading,
     error,
     cambiarFiltro,
+    limpiarFiltros,
     paginaSiguiente,
     paginaAnterior,
     hayPaginaSiguiente,
     hayPaginaAnterior,
   } = useInventario();
   const { recintos } = useRecintos();
+
+  // El select espera { valor, texto }
+  const opcionesRecinto = recintos.map((recinto) => ({ valor: recinto.recintoId, texto: recinto.nombre }));
 
   return (
     <div>
@@ -34,56 +42,29 @@ export default function Inventario() {
 
       <main className="mx-auto max-w-7xl space-y-6 px-6 py-6">
         {/* Filtros */}
-        <section className="grid grid-cols-1 gap-4 rounded-xl bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-4">
-          <label className={ESTILO_ETIQUETA}>
-            Recinto
-            <select
-              className={ESTILO_CAMPO}
-              value={filtros.recintoId}
-              onChange={(evento) => cambiarFiltro("recintoId", evento.target.value)}
-            >
-              <option value="">Todos</option>
-              {recintos.map((recinto) => (
-                <option key={recinto.recintoId} value={recinto.recintoId}>
-                  {recinto.nombre}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className={ESTILO_ETIQUETA}>
-            Estado
-            <select
-              className={ESTILO_CAMPO}
-              value={filtros.estado}
-              onChange={(evento) => cambiarFiltro("estado", evento.target.value)}
-            >
-              <option value="">Todos</option>
-              <option value="Disponible">Disponible</option>
-              <option value="Reservado">Reservado</option>
-              <option value="Entregado">Entregado</option>
-            </select>
-          </label>
-
-          <label className={ESTILO_ETIQUETA}>
-            Desde
-            <input
-              type="date"
-              className={ESTILO_CAMPO}
-              value={filtros.fechaDesde}
-              onChange={(evento) => cambiarFiltro("fechaDesde", evento.target.value)}
+        <section className="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-slate-900">Filtros</h2>
+            <button onClick={limpiarFiltros} className="text-sm font-medium text-blue-700 hover:text-blue-900">
+              Limpiar filtros
+            </button>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <CampoSelect
+              etiqueta="Recinto"
+              valor={filtros.recintoId}
+              onCambiar={(valor) => cambiarFiltro("recintoId", valor)}
+              opciones={opcionesRecinto}
             />
-          </label>
-
-          <label className={ESTILO_ETIQUETA}>
-            Hasta
-            <input
-              type="date"
-              className={ESTILO_CAMPO}
-              value={filtros.fechaHasta}
-              onChange={(evento) => cambiarFiltro("fechaHasta", evento.target.value)}
+            <CampoSelect
+              etiqueta="Estado"
+              valor={filtros.estado}
+              onCambiar={(valor) => cambiarFiltro("estado", valor)}
+              opciones={OPCIONES_ESTADO}
             />
-          </label>
+            <CampoFecha etiqueta="Desde" valor={filtros.fechaDesde} onCambiar={(valor) => cambiarFiltro("fechaDesde", valor)} />
+            <CampoFecha etiqueta="Hasta" valor={filtros.fechaHasta} onCambiar={(valor) => cambiarFiltro("fechaHasta", valor)} />
+          </div>
         </section>
 
         {/* Error del backend (ej: sesión expirada) */}
