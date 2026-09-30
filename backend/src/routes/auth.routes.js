@@ -2,11 +2,12 @@
 import { Router } from "express";
 import {
   loginAlumnoController,
+  loginFuncionarioController,
   logoutController,
   perfilController,
 } from "../controllers/auth.controller.js";
 import { validate } from "../middleware/validate.middleware.js";
-import { loginSchema } from "../schemas/auth.schema.js";
+import { loginFuncionarioSchema, loginSchema } from "../schemas/auth.schema.js";
 import { authMiddleware } from "../middleware/auth.middleware.js";
 
 const router = Router();
@@ -19,6 +20,12 @@ router.post(
   "/login",
   validate(loginSchema, "Datos de inicio de sesión inválidos."),
   loginAlumnoController
+);
+
+router.post(
+  "/login/funcionario",
+  validate(loginFuncionarioSchema, "Datos de inicio de sesión inválidos."),
+  loginFuncionarioController
 );
 
 /**

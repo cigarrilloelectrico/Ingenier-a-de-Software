@@ -1,3 +1,5 @@
+import { prisma } from '../config/configDb.js';
+
 const calcularPuntajeFecha = (fechaHallazgo, fechaPerdida) => {
   const f1 = new Date(fechaHallazgo);
   const f2 = new Date(fechaPerdida);
@@ -12,7 +14,39 @@ const calcularPuntajeFecha = (fechaHallazgo, fechaPerdida) => {
   return { puntos: 0, coincide: false, detalle: "Más de una semana de diferencia" };
 };
 
-export const calcularCoincidencias = (objetoBuscado, listaAvisos) => {
+export const calcularCoincidencias = async (idObjeto) => {
+  const objeto = await prisma.objeto.findUnique({
+    where: { objetoId: idObjeto },
+  });
+
+  if (!objeto) {
+    throw new Error('No se encontró el objeto reportado para calcular coincidencias.');
+  }
+
+  const avisos = await prisma.aviso.findMany({
+    where: {
+      estado: 'Publicado',
+      fechaPerdida: { lte: objeto.fechaRecepcion },
+    },
+  });
+
+  const objetoBuscado = {
+    id: objeto.objetoId,
+    id_tipo_objeto: objeto.tipoObjetoId,
+    color: objeto.color,
+    id_sede: objeto.recintoHallazgoId,
+    fecha_hallazgo: objeto.fechaRecepcion,
+  };
+
+  const listaAvisos = avisos.map(aviso => ({
+    id: aviso.avisoId,
+    id_tipo_objeto: aviso.tipoObjetoId,
+    color: aviso.color,
+    id_sede: aviso.recintoId,
+    fecha_perdida: aviso.fechaPerdida,
+    estado: aviso.estado.toLowerCase(),
+  }));
+
   const avisosValidos = listaAvisos.filter(aviso => {
     if (aviso.estado !== 'publicado') return false; 
     const fechaHallazgo = new Date(objetoBuscado.fecha_hallazgo);
@@ -22,7 +56,7 @@ export const calcularCoincidencias = (objetoBuscado, listaAvisos) => {
     return true;
   });
 
-  return avisosValidos.map(aviso => {
+  const resultados = avisosValidos.map(aviso => {
     const coincideTipo = aviso.id_tipo_objeto === objetoBuscado.id_tipo_objeto;
     const puntosTipo = coincideTipo ? 40 : 0;
 
@@ -55,4 +89,6 @@ export const calcularCoincidencias = (objetoBuscado, listaAvisos) => {
       }
     };
   }).sort((a, b) => b.scoreTotal - a.scoreTotal);
+
+  return { objetoBuscado, resultados };
 };
