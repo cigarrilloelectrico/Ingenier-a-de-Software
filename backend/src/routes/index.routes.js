@@ -2,6 +2,7 @@ import { Router } from "express";
 import inventarioRouter from "./inventario.routes.js";
 import recintoRouter from "./recinto.routes.js";
 import matchRouter from "./match.routes.js";
+import tipoObjetoRouter from "./tipoObjeto.routes.js";
 
 /**
  * Mounts every API router under /api.
