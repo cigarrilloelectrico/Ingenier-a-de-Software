@@ -8,7 +8,7 @@ export default function MatchEngine() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get('/match/101')
+    axios.get('/match/9001')
       .then(response => {
         const { data } = response;
         if (data.success) {
@@ -26,12 +26,12 @@ export default function MatchEngine() {
 
   return (
     <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
-      <Link to="/" style={{ textDecoration: 'none', color: '#4b5563', marginBottom: '20px', display: 'inline-block' }}>
+      <Link to="/" style={{ textDecoration: 'none', color: '#252e39', marginBottom: '20px', display: 'inline-block' }}>
         ← Volver al inicio
       </Link>
 
       <h2>Motor de Coincidencias RF20</h2>
-      <p>Buscando posibles dueños para el objeto encontrado #101</p>
+      <p>Buscando posibles dueños para el objeto encontrado</p>
 
       <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', marginTop: '20px' }}>
         {matches.map(match => (

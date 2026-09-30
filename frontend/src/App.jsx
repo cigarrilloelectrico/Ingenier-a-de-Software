@@ -1,10 +1,16 @@
-import { BrowserRouter } from 'react-router-dom';
-import AppRoutes from './routes/AppRoutes';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Home from './pages/Home';
+import MatchEngine from './pages/MatchEngine';
+import RegistroObjeto from './components/RegistroObjeto';
 
 function App() {
   return (
     <BrowserRouter>
-      <AppRoutes />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/motor-coincidencias" element={<MatchEngine />} />
+        <Route path="/registrar-objeto" element={<RegistroObjeto />} />
+      </Routes>
     </BrowserRouter>
   );
 }
