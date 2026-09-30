@@ -95,6 +95,40 @@ async function main() {
     },
   });
 
+  const tipoTelefono = await prisma.tipoObjeto.upsert({
+    where: { nombre: 'Teléfono' }, update: {}, create: { nombre: 'Teléfono', estado: 'Activo' },
+  });
+  // Distinto tipo, misma fecha, color y recinto: antes aparecía con 60 puntos, ahora NO debe aparecer
+  await prisma.aviso.upsert({
+    where: { avisoId: 9002 }, update: {},
+    create: { avisoId: 9002, alumnoId: alumno.usuarioId, tipoObjetoId: tipoTelefono.tipoObjetoId,
+      recintoId: recinto.recintoId, color: 'Negro', descripcion: 'Teléfono con funda negra y rayón',
+      fechaPerdida: new Date('2026-09-28'), estado: 'Publicado' },
+  });
+  // Mismo tipo, otro color, 5 días antes, debe salir con 75 (MEDIA)
+  await prisma.aviso.upsert({
+    where: { avisoId: 9003 }, update: {},
+    create: { avisoId: 9003, alumnoId: alumno.usuarioId, tipoObjetoId: tipoMochila.tipoObjetoId,
+      recintoId: recinto.recintoId, color: 'Rojo', descripcion: 'Mochila roja con cierre roto',
+      fechaPerdida: new Date('2026-09-23'), estado: 'Publicado' },
+  });
+  // Objeto reservado, para probar el 409
+  await prisma.objeto.upsert({
+    where: { objetoId: 9002 }, update: {},
+    create: { objetoId: 9002, recintoId: recinto.recintoId, recintoHallazgoId: recinto.recintoId,
+      tipoObjetoId: tipoMochila.tipoObjetoId, registradoPorId: funcionario.usuarioId,
+      color: 'Azul', descripcion: 'Mochila azul reservada de prueba',
+      fechaRecepcion: new Date('2026-09-28'), estado: 'Reservado' },
+  });
+  // Mismas señas, color y día que el objeto, debe quedar primero (95, ALTA)
+  await prisma.aviso.upsert({
+    where: { avisoId: 9004 }, update: {},
+    create: { avisoId: 9004, alumnoId: alumno.usuarioId, tipoObjetoId: tipoMochila.tipoObjetoId,
+      recintoId: recinto.recintoId, color: 'Negro',
+      descripcion: 'Mochila negra Targus con un llavero de Spider-Man y un parche',
+      fechaPerdida: new Date('2026-09-28'), estado: 'Publicado' },
+  });
+
   console.log('✅ Datos de prueba cargados correctamente.');
   console.log(`Objeto ID: ${objeto.objetoId} | Aviso ID: ${aviso.avisoId}`);
 }
