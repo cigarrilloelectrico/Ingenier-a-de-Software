@@ -1,6 +1,6 @@
 import { handleErrorClient } from "../handlers/responseHandlers.js";
 
-export const validate = (schema) => (req, res, next) => {
+export const validate = (schema, defaultMessage = "Error de validación en los datos enviados") => (req, res, next) => {
   const result = schema.safeParse(req.body);
 
   if (!result.success) {
@@ -12,12 +12,12 @@ export const validate = (schema) => (req, res, next) => {
     return handleErrorClient(
       res,
       400,
-      "Error de validación en los campos del aviso",
+      defaultMessage,
       errorDetails
     );
   }
 
-  // Asignamos la data ya parseada y sanitizada (con números convertidos y strings recortados)
+  // Asignamos la data ya parseada y sanitizada
   req.body = result.data;
   next();
 };
