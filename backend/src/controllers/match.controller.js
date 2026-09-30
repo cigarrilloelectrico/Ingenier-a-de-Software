@@ -1,18 +1,21 @@
 import { calcularCoincidencias } from '../services/match.service.js';
+import { handleErrorClient, handleErrorServer } from '../handlers/responseHandlers.js';
 
-export const getMatches = async (req, res, next) => {
+export const getMatches = async (req, res) => {
   try {
-    const { id } = req.params;
-    const targetId = parseInt(id);
+    const targetId = Number(req.params.id);
     const { objetoBuscado, resultados } = await calcularCoincidencias(targetId);
 
     res.status(200).json({
       success: true,
       objetoConsultado: objetoBuscado,
       totalResultados: resultados.length,
-      data: resultados
+      data: resultados,
     });
   } catch (error) {
-    next(error); 
+    if (error.statusCode) {
+      return handleErrorClient(res, error.statusCode, error.message);
+    }
+    return handleErrorServer(res, 500, 'Error al calcular las coincidencias', error); 
   }
 };
