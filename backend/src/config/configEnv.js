@@ -10,7 +10,7 @@ function required(name) {
 export const db = {
   user: process.env.DB_USERNAME || process.env.DB_USER,
   password: process.env.DB_PASSWORD,
-  host: process.env.DB_HOST,
+  host: process.env.DB_HOST || process.env.HOST || 'localhost',
   port: Number(process.env.DB_PORT) || 5432,
   database: process.env.DATABASE || process.env.DB_NAME
 }

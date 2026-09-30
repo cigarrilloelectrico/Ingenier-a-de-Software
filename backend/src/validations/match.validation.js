@@ -1,4 +1,4 @@
-const validarIdObjeto = (req, res, next) => {
+export const validarIdObjeto = (req, res, next) => {
   const { id } = req.params;
 
   // Validar que el ID exista y sea un número válido
@@ -20,5 +20,3 @@ const validarIdObjeto = (req, res, next) => {
 
   next();
 };
-
-export { validarIdObjeto };
