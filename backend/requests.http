@@ -1,2 +1,0 @@
-### Buscar coincidencias para el objeto con ID 101
-GET http://localhost:3000/api/match/101

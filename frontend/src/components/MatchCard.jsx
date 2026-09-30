@@ -1,5 +1,3 @@
-// frontend/src/components/MatchCard.jsx
-
 export default function MatchCard({ matchData }) {
   const { porcentaje_match, detalles } = matchData;
 

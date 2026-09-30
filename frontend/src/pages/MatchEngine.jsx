@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
 import MatchCard from '../components/MatchCard';
 import { Link } from 'react-router-dom';
+import axios from '../services/root.service';
 
 export default function MatchEngine() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_BASE_URL}/match/101`)
-      .then(res => res.json())
-      .then(data => {
+    axios.get('/match/101')
+      .then(response => {
+        const { data } = response;
         if (data.success) {
           setMatches(data.data);
         }
