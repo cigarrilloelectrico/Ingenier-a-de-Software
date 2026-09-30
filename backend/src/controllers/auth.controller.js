@@ -1,5 +1,6 @@
 "use strict";
 import {
+  registrarAlumnoService,
   loginAlumnoService,
   loginFuncionarioService,
   logoutService,
@@ -11,6 +12,25 @@ import {
   handleErrorServer,
 } from "../handlers/responseHandlers.js";
 import { SESSION_MAX_MS } from "../config/configEnv.js";
+
+export async function registrarAlumnoController(req, res) {
+  try {
+    const result = await registrarAlumnoService(req.body);
+
+    if (result.error) {
+      return handleErrorClient(res, result.statusCode || 400, result.error);
+    }
+
+    return handleSuccess(
+      res,
+      201,
+      "Registro creado. Revisa tu correo para obtener el código de verificación.",
+      result.usuario
+    );
+  } catch (error) {
+    return handleErrorServer(res, 503, "No fue posible enviar el código de verificación.", error.message);
+  }
+}
 
 /**
  * Inicia sesión para un Alumno, crea sesión en BD y adjunta cookie HttpOnly con JWT.
