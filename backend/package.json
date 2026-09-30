@@ -8,6 +8,7 @@
     "start": "tsx index.js",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
+    "db:seed": "tsx seed.js",
     "db:studio": "prisma studio",
     "db:format": "prisma format"
   },
