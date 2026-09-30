@@ -1,14 +1,5 @@
 import { z } from "zod";
 
-/**
- * Esquema de validación para la creación de un Aviso de Pérdida usando Zod.
- * Cumple con las reglas del requerimiento:
- * - Tipo de objeto obligatorio (debe ser un ID numérico de la tabla TipoObjeto).
- * - Recinto obligatorio (debe ser un ID numérico de la tabla Recinto).
- * - Color obligatorio (hasta 40 caracteres).
- * - Marcas / señas particulares (campo descripcion): longitud estricta entre 20 y 500 caracteres.
- * - Fecha de pérdida: no futura y no anterior a 180 días.
- */
 export const crearAvisoSchema = z.object({
   tipoObjetoId: z.coerce
     .number({

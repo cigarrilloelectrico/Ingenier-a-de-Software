@@ -1,14 +1,5 @@
 import { handleErrorClient } from "../handlers/responseHandlers.js";
 
-/**
- * Middleware genérico de validación para esquemas Zod.
- * Intercepta la petición antes de que llegue al controlador.
- * Si algún campo falta o no cumple las reglas, devuelve una respuesta HTTP 400
- * con el listado detallado de errores y detiene la petición.
- *
- * @param {import("zod").ZodSchema} schema - Esquema de Zod contra el cual validar req.body
- * @returns {import("express").RequestHandler}
- */
 export const validate = (schema) => (req, res, next) => {
   const result = schema.safeParse(req.body);
 
