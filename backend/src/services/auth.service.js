@@ -5,7 +5,7 @@ import { prisma } from "../config/configDb.js";
 import { getJwtSecret, SESSION_MAX_MS } from "../config/configEnv.js";
 import { hashToken } from "../middleware/auth.middleware.js";
 
-export const loginAlumnoService = async ({ correo, password }) => {
+const loginService = async ({ correo, password, rolPermitido }) => {
   const correoNormalizado = correo.trim().toLowerCase();
 
   const usuario = await prisma.usuario.findUnique({
@@ -28,20 +28,20 @@ export const loginAlumnoService = async ({ correo, password }) => {
     };
   }
 
-  // 2. Validar existencia, rol Alumno y contraseña con bcrypt
-  const esAlumno = usuario && usuario.rol === "Alumno";
+  // 2. Validar existencia, rol permitido y contraseña con bcrypt
+  const tieneRolPermitido = usuario && usuario.rol === rolPermitido;
   const tienePassword = Boolean(usuario?.passwordHash);
   let passwordValida = false;
 
-  if (esAlumno && tienePassword) {
+  if (tieneRolPermitido && tienePassword) {
     passwordValida = await bcrypt.compare(password, usuario.passwordHash);
   }
 
   // Si falló el correo, el rol, la contraseña o la cuenta aún no está verificada
-  const credencialesCorrectas = esAlumno && tienePassword && passwordValida && usuario.estado !== "NoVerificado";
+  const credencialesCorrectas = tieneRolPermitido && tienePassword && passwordValida && usuario.estado !== "NoVerificado";
 
   if (!credencialesCorrectas) {
-    if (usuario && esAlumno) {
+    if (usuario && tieneRolPermitido) {
       const nuevosIntentos = (usuario.intentosFallidos || 0) + 1;
       const dataUpdate = { intentosFallidos: nuevosIntentos };
 
@@ -130,6 +130,12 @@ export const loginAlumnoService = async ({ correo, password }) => {
     },
   };
 };
+
+export const loginAlumnoService = (credentials) =>
+  loginService({ ...credentials, rolPermitido: "Alumno" });
+
+export const loginFuncionarioService = (credentials) =>
+  loginService({ ...credentials, rolPermitido: "Funcionario" });
 
 /**
  * Servicio para cerrar la sesión en la base de datos.

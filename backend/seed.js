@@ -4,6 +4,7 @@ import { prisma } from './src/config/configDb.js';
 async function main() {
   console.log('🌱 Cargando datos de prueba...');
   const passwordHash = await bcrypt.hash('Alumno123!', 10);
+  const funcionarioPasswordHash = await bcrypt.hash('Funcionario123!', 10);
 
   const recinto = await prisma.recinto.upsert({
     where: { nombre: 'Campus Concepción' },
@@ -50,6 +51,7 @@ async function main() {
       rol: 'Funcionario',
       estado: 'Activo',
       recintoId: recinto.recintoId,
+      passwordHash: funcionarioPasswordHash,
     },
     create: {
       correo: 'funcionario@ubiobio.cl',
@@ -58,6 +60,7 @@ async function main() {
       nombre: 'Carlos',
       apellidos: 'González',
       recintoId: recinto.recintoId,
+      passwordHash: funcionarioPasswordHash,
     },
   });
 
