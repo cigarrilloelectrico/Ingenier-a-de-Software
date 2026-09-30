@@ -53,14 +53,14 @@ async function main() {
     },
   });
 
-  //Objetos: solo si el inventario está vacío, para no duplicarlos
-  const objetosExistentes = await prisma.objeto.count();
-  if (objetosExistentes > 0) {
-    console.log(`El inventario ya tiene ${objetosExistentes} objetos, no se agregan más.`);
+  //Objetos: solo si esta seed no los cargó antes; los objetos de otras seeds no cuentan
+  const objetosDeEstaSeed = await prisma.objeto.count({ where: { registradoPorId: funcionario.usuarioId } });
+  if (objetosDeEstaSeed > 0) {
+    console.log(`Los ${objetosDeEstaSeed} objetos de prueba ya existen, no se agregan más.`);
     return;
   }
 
-  for (let i = 0; i < 24; i++) {
+  for (let i = 0; i < 40; i++) {
     await prisma.objeto.create({
       data: {
         recintoId: recintos[i % 3].recintoId,
@@ -76,7 +76,7 @@ async function main() {
     });
   }
 
-  console.log("Seed lista: 3 recintos, 6 tipos de objeto, 1 funcionario y 24 objetos.");
+  console.log("Seed lista: 3 recintos, 6 tipos de objeto, 1 funcionario y 40 objetos.");
 }
 
 try {
