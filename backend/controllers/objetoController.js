@@ -10,7 +10,13 @@ const registrarObjeto = async (req, res, next) => {
       fechaRecepcion,
     } = req.body
 
-    const imagen = req.file ?? null
+    if (!req.file) {
+      const error = new Error('Debe adjuntar al menos una imagen')
+      error.statusCode = 400
+      throw error
+    }
+
+    const imagen = req.file
 
     const datosObjeto = {
       tipo,
