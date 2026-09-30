@@ -1,0 +1,10 @@
+model TipoObjeto {
+  tipoObjetoId Int            @id @default(autoincrement())
+  nombre       String         @unique @db.VarChar(80)
+  estado       EstadoCatalogo @default(Activo)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  avisos  Aviso[]
+  objetos Objeto[]
+}

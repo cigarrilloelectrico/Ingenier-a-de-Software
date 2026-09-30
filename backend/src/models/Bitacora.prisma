@@ -1,0 +1,18 @@
+// Read-only log of administrator actions (RF45). tablaAfectada + registroAfectadoId is a
+// polymorphic reference (Recinto, Usuario, Carrera or TipoObjeto), so it can't be a foreign key.
+model Bitacora {
+  bitacoraId         Int                @id @default(autoincrement())
+  administradorId    Int
+  tipoAccion         TipoAccionBitacora
+  tablaAfectada      String             @db.VarChar(40)
+  registroAfectadoId Int
+  valorAnterior      String?            @db.Text
+  valorNuevo         String?            @db.Text
+  motivo             String?            @db.VarChar(500)
+  createdAt          DateTime           @default(now())
+
+  administrador Usuario @relation(fields: [administradorId], references: [usuarioId])
+
+  @@index([tablaAfectada, registroAfectadoId])
+  @@index([createdAt])
+}
