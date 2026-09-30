@@ -11,29 +11,29 @@ datasource db {
 }
 
 model Carrera {
-  CarreraID  Int       @id @default(autoincrement())
-  Nombre     String    @db.VarChar(100)
-  Estado     String    @default("activo") @db.VarChar(20)
-  Created_at DateTime  @default(now())
-  Updated_at DateTime  @updatedAt
+  CarreraID  Int      @id @default(autoincrement())
+  Nombre     String   @db.VarChar(100)
+  Estado     String   @default("activo") @db.VarChar(20)
+  Created_at DateTime @default(now())
+  Updated_at DateTime @updatedAt
 
-  usuarios   Usuario[]
+  usuarios Usuario[]
 
   @@map("Carrera")
 }
 
 model Recinto {
-  RecintoID       Int       @id @default(autoincrement())
-  Nombre          String    @db.VarChar(100)
-  Latitud         Decimal?  @db.Decimal(10, 8)
-  Longitud        Decimal?  @db.Decimal(11, 8)
-  HorarioAtencion String?   @db.VarChar(100)
-  Estado          String    @default("activo") @db.VarChar(20)
-  Created_at      DateTime  @default(now())
-  Updated_at      DateTime  @updatedAt
+  RecintoID       Int      @id @default(autoincrement())
+  Nombre          String   @db.VarChar(100)
+  Latitud         Decimal? @db.Decimal(10, 8)
+  Longitud        Decimal? @db.Decimal(11, 8)
+  HorarioAtencion String?  @db.VarChar(100)
+  Estado          String   @default("activo") @db.VarChar(20)
+  Created_at      DateTime @default(now())
+  Updated_at      DateTime @updatedAt
 
-  usuarios        Usuario[]
-  avisos          Aviso[]
+  usuarios Usuario[]
+  avisos   Aviso[]
 
   @@map("Recinto")
 }
@@ -45,7 +45,7 @@ model TipoObjeto {
   Created_at   DateTime @default(now())
   Updated_at   DateTime @updatedAt
 
-  avisos       Aviso[]
+  avisos Aviso[]
 
   @@map("TipoObjeto")
 }
@@ -70,34 +70,34 @@ model Usuario {
   Created_at          DateTime  @default(now())
   Updated_at          DateTime  @updatedAt
 
-  carrera             Carrera?  @relation(fields: [CarreraID], references: [CarreraID])
-  recinto             Recinto?  @relation(fields: [RecintoID], references: [RecintoID])
-  avisos              Aviso[]
+  carrera Carrera? @relation(fields: [CarreraID], references: [CarreraID])
+  recinto Recinto? @relation(fields: [RecintoID], references: [RecintoID])
+  avisos  Aviso[]
 
   @@map("Usuario")
 }
 
 model Aviso {
-  AvisoID          Int        @id @default(autoincrement())
+  AvisoID          Int      @id @default(autoincrement())
   AlumnoID         Int
   TipoObjetoID     Int
   RecintoID        Int
   AvisoCorregidoID Int?
-  Color            String     @db.VarChar(50)
-  Descripcion      String     @db.VarChar(500)
-  FechaPerdida     DateTime   @db.Date
-  FotoUrl          String?    @db.VarChar(255)
-  Estado           String     @default("publicado") @db.VarChar(20)
-  MotivoCierre     String?    @db.VarChar(100)
-  ComentarioCierre String?    @db.VarChar(500)
-  Created_at       DateTime   @default(now())
-  Updated_at       DateTime   @updatedAt
+  Color            String   @db.VarChar(50)
+  Descripcion      String   @db.VarChar(500)
+  FechaPerdida     DateTime @db.Date
+  FotoUrl          String?  @db.VarChar(255)
+  Estado           String   @default("publicado") @db.VarChar(20)
+  MotivoCierre     String?  @db.VarChar(100)
+  ComentarioCierre String?  @db.VarChar(500)
+  Created_at       DateTime @default(now())
+  Updated_at       DateTime @updatedAt
 
-  alumno           Usuario    @relation(fields: [AlumnoID], references: [UsuarioID])
-  tipoObjeto       TipoObjeto @relation(fields: [TipoObjetoID], references: [TipoObjetoID])
-  recinto          Recinto    @relation(fields: [RecintoID], references: [RecintoID])
-  avisoCorregido   Aviso?     @relation("CorreccionAviso", fields: [AvisoCorregidoID], references: [AvisoID])
-  correcciones     Aviso[]    @relation("CorreccionAviso")
+  alumno         Usuario    @relation(fields: [AlumnoID], references: [UsuarioID])
+  tipoObjeto     TipoObjeto @relation(fields: [TipoObjetoID], references: [TipoObjetoID])
+  recinto        Recinto    @relation(fields: [RecintoID], references: [RecintoID])
+  avisoCorregido Aviso?     @relation("CorreccionAviso", fields: [AvisoCorregidoID], references: [AvisoID])
+  correcciones   Aviso[]    @relation("CorreccionAviso")
 
   @@map("Aviso")
 }
