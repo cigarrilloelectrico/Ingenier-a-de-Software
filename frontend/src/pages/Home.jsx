@@ -12,6 +12,11 @@ export default function Home() {
           <span>Registrar Avisos y Objetos (Pendiente)</span>
         </li>
         <li>
+          <Link to="/alumno/registro" style={{ color: '#2563eb', fontWeight: 'bold' }}>
+            Registrarse como alumno
+          </Link>
+        </li>
+        <li>
           <Link to="/motor-coincidencias" style={{ color: '#2563eb', fontWeight: 'bold' }}>
             Motor de Coincidencias
           </Link>
