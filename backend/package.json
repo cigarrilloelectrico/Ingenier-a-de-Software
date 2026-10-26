@@ -10,7 +10,8 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx seed.js",
     "db:studio": "prisma studio",
-    "db:format": "prisma format"
+    "db:format": "prisma format",
+    "db:seed-inventario": "node prisma/seed.js"
   },
   "keywords": [],
   "author": "",

@@ -60,6 +60,11 @@ export function useInventario() {
     setFiltros({ ...filtros, [nombre]: valor, pagina: 1 });
   };
 
+  const limpiarFiltros = () => {
+    setLoading(true);
+    setFiltros(FILTROS_INICIALES);
+  };
+
   const paginaSiguiente = () => {
     setLoading(true);
     setFiltros({ ...filtros, pagina: filtros.pagina + 1 });
@@ -86,6 +91,7 @@ export function useInventario() {
     loading,
     error,
     cambiarFiltro,
+    limpiarFiltros,
     paginaSiguiente,
     paginaAnterior,
     hayPaginaSiguiente,
