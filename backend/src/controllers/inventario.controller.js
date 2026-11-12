@@ -1,5 +1,5 @@
 "use strict";
-import fs from "fs";
+import fs from "fs"; 
 import {
   visualizarInventarioService,
   registrarObjetoService,
@@ -52,7 +52,6 @@ export async function registrarObjetoController(req, res) {
       fotosUrl: req.files.map((file) => file.filename),
     };
 
-    // El funcionario y su recinto vienen de la sesión (authMiddleware), no del formulario
     const objeto = await registrarObjetoService(req.user.usuarioId, req.user.recintoId, datos);
     handleSuccess(res, 201, "Objeto registrado en el inventario", objeto);
   } catch (error) {

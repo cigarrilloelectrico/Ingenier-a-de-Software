@@ -44,8 +44,8 @@ export async function registrarObjetoService(funcionarioId, recintoFuncionarioId
         descripcion,
         fechaRecepcion,
         entregadoPor,
-        fotos: { create: fotosUrl.map((fotoUrl) => ({ fotoUrl })) },
-      },
+        fotos: { create: fotosUrl.map((fotoUrl) => ({ fotoUrl })) }, // arreglo strings a arreglo objetos
+            },
       include: { fotos: true },
     });
   } catch (error) {

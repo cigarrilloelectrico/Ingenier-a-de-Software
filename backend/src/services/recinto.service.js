@@ -87,7 +87,7 @@ export async function desactivarRecintoService(recintoId, administradorId) {
     if (!recinto) throw new Error("Recinto no encontrado.");
     if (recinto.estado === "Inactivo") throw new Error("El recinto ya está desactivado.");
 
-    //No se puede desactivar si deja objetos sin custodia o funcionarios sin recinto (RF34)
+    //No se puede desactivar si deja objetos sin custodia o funcionarios sin recinto 
     const objetosEnCustodia = await prisma.objeto.count({
       where: { recintoId, estado: { in: ["Disponible", "Reservado"] } },
     });
