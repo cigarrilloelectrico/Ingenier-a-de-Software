@@ -1,5 +1,3 @@
-"use strict";
-
 import { visualizarTiposObjetoService } from "../services/tipoObjeto.service.js";
 import {
   handleSuccess,

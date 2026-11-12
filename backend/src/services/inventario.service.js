@@ -1,4 +1,3 @@
-"use strict";
 import { prisma } from "../config/configDb.js";
 
 export async function visualizarInventarioService({ pagina = 1, recintoId, tipoObjetoId, estado, fechaDesde, fechaHasta }) {

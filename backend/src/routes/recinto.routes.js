@@ -1,4 +1,3 @@
-"use strict";
 import { Router } from "express";
 import { authMiddleware, authorizeRoles } from "../middleware/auth.middleware.js";
 import {
