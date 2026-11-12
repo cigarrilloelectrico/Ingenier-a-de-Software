@@ -1,9 +1,66 @@
 import bcrypt from "bcryptjs";
+import { randomInt } from "node:crypto";
 import jwt from "jsonwebtoken";
 import { randomUUID } from "node:crypto";
 import { prisma } from "../config/configDb.js";
-import { getJwtSecret, SESSION_MAX_MS } from "../config/configEnv.js";
+import { getJwtSecret, SESSION_MAX_MS, VERIFICATION_CODE_TTL_MS } from "../config/configEnv.js";
 import { hashToken } from "../middleware/auth.middleware.js";
+import { enviarCodigoVerificacion } from "./email.service.js";
+
+const CODIGO_EXPIRACION_MS = VERIFICATION_CODE_TTL_MS;
+
+// Registra un alumno no verificado y envía el código de verificación por correo
+export const registrarAlumnoService = async ({ correo }) => {
+  // 1. Normalizar el correo y verificar que no esté registrado
+  const correoNormalizado = correo.trim().toLowerCase();
+  const existente = await prisma.usuario.findUnique({ where: { correo: correoNormalizado } });
+
+  if (existente) {
+    return {
+      error: "El correo electrónico ya está registrado.",
+      statusCode: 409,
+    };
+  }
+
+  // 2. Generar y proteger el código de verificación
+  const codigo = String(randomInt(100000, 1000000));
+  const codigoHash = await bcrypt.hash(codigo, 10);
+
+  // 3. Crear la cuenta y guardar el código con una vigencia de 15 minutos
+  const usuario = await prisma.usuario.create({
+    data: {
+      correo: correoNormalizado,
+      rol: "Alumno",
+      estado: "NoVerificado",
+      segundoFactorActivo: true,
+      codigosVerificacion: {
+        create: {
+          codigoHash,
+          proposito: "VerificarCorreo",
+          expiraAt: new Date(Date.now() + CODIGO_EXPIRACION_MS),
+        },
+      },
+    },
+    select: { usuarioId: true, correo: true, estado: true },
+  });
+
+  // 4. Enviar el código; si falla, evitar dejar una cuenta sin posibilidad de verificar
+  try {
+    await enviarCodigoVerificacion({ correo: usuario.correo, codigo });
+  } catch (error) {
+    await prisma.usuario.delete({ where: { usuarioId: usuario.usuarioId } });
+    throw error;
+  }
+
+  // 5. No devolver el código ni el hash al cliente
+  return {
+    usuario: {
+      usuarioId: usuario.usuarioId,
+      correo: usuario.correo,
+      estado: usuario.estado,
+    },
+  };
+};
 
 const loginService = async ({ correo, password, rolPermitido }) => {
   const correoNormalizado = correo.trim().toLowerCase();

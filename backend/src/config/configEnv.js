@@ -23,6 +23,9 @@ export const PORT = Number(process.env.PORT) || 3000;
 export const HOST = process.env.HOST || 'localhost';
 export const EMAIL_USER = process.env.EMAIL_USER;
 export const EMAIL_PASS = process.env.EMAIL_PASS;
+export const EMAIL_HOST = process.env.EMAIL_HOST || "smtp.gmail.com";
+export const EMAIL_PORT = Number(process.env.EMAIL_PORT) || 587;
+export const VERIFICATION_CODE_TTL_MS = 15 * 60 * 1000;
 
 export const getJwtSecret = () => required('JWT_SECRET');
 
