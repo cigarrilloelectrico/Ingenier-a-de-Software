@@ -12,7 +12,7 @@ import {
   loginSchema,
   registroAlumnoSchema,
 } from "../schemas/auth.schema.js";
-import { authMiddleware } from "../middleware/auth.middleware.js";
+import { authPasswordTemporalMiddleware } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
@@ -40,12 +40,14 @@ router.post(
 
 /**
  * Cerrar sesión activa.
+ * Abierta también a quien tiene contraseña temporal, para que pueda salir sin cambiarla.
  */
-router.post("/logout", authMiddleware, logoutController);
+router.post("/logout", authPasswordTemporalMiddleware, logoutController);
 
 /**
- * Obtener perfil del alumno logueado actualmente.
+ * Obtener perfil del usuario logueado actualmente.
+ * Abierta también a quien tiene contraseña temporal: el front lee `passwordTemporal` para mostrar el popup de cambio.
  */
-router.get("/me", authMiddleware, perfilController);
+router.get("/me", authPasswordTemporalMiddleware, perfilController);
 
 export default router;

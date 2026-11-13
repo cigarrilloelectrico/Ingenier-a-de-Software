@@ -12,8 +12,17 @@ export const hashToken = (token) => createHash("sha256").update(token).digest("h
  * The database check is what allows closing sessions remotely (RF5, RF28, RF37, RF47)
  * and expiring them after 30 minutes of inactivity (RF4).
  * On success sets `req.user = { usuarioId, rol, recintoId, sesionId }` (recintoId is only set for funcionarios).
+ * A funcionario who still has a temporary password is rejected until they replace it (RF35).
  */
-export const authMiddleware = async (req, res, next) => {
+export const authMiddleware = (req, res, next) => verificarSesion(req, res, next, false);
+
+/**
+ * Same as authMiddleware, but also lets through a funcionario who still has a temporary password.
+ * Only for the routes they need before replacing it: replacing it, reading their profile and logging out.
+ */
+export const authPasswordTemporalMiddleware = (req, res, next) => verificarSesion(req, res, next, true);
+
+const verificarSesion = async (req, res, next, permitirPasswordTemporal) => {
   const token = req.cookies?.accessToken;
 
   if (!token) {
@@ -29,7 +38,7 @@ export const authMiddleware = async (req, res, next) => {
 
   const sesion = await prisma.sesion.findUnique({
     where: { sesionId: payload.sesionId },
-    include: { usuario: { select: { usuarioId: true, rol: true, estado: true, recintoId: true } } },
+    include: { usuario: { select: { usuarioId: true, rol: true, estado: true, recintoId: true, passwordTemporal: true } } },
   });
 
   const now = new Date();
@@ -46,6 +55,10 @@ export const authMiddleware = async (req, res, next) => {
 
   if (sesion.usuario.estado !== "Activo") {
     return handleErrorClient(res, 401, "Acceso denegado. Cuenta inactiva o bloqueada.");
+  }
+
+  if (sesion.usuario.passwordTemporal && !permitirPasswordTemporal) {
+    return handleErrorClient(res, 403, "Debe cambiar su contraseña temporal antes de continuar.");
   }
 
   await prisma.sesion.update({

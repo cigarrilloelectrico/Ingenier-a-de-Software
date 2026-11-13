@@ -135,7 +135,15 @@ const loginService = async ({ correo, password, rolPermitido }) => {
     };
   }
 
-  // 5. Verificar que la cuenta esté activa
+  // 5. Cuenta de funcionario desactivada por el administrador (RF37)
+  if (usuario.estado === "Desactivado") {
+    return {
+      error: "Su cuenta fue desactivada. Contacte al administrador.",
+      statusCode: 403,
+    };
+  }
+
+  // 6. Verificar que la cuenta esté activa
   if (usuario.estado !== "Activo") {
     return {
       error: "Acceso denegado. La cuenta no se encuentra activa.",
@@ -143,7 +151,15 @@ const loginService = async ({ correo, password, rolPermitido }) => {
     };
   }
 
-  // 6. Crear la sesión en la base de datos
+  // 7. La contraseña temporal del funcionario caduca a los 7 días (RF35)
+  if (usuario.passwordTemporal && usuario.passwordExpiredAt && usuario.passwordExpiredAt < now) {
+    return {
+      error: "Su contraseña temporal caducó. Contacte al administrador.",
+      statusCode: 401,
+    };
+  }
+
+  // 8. Crear la sesión en la base de datos
   const tempHash = `temp-${randomUUID()}`;
   const expiraAt = new Date(Date.now() + SESSION_MAX_MS);
 
@@ -184,6 +200,8 @@ const loginService = async ({ correo, password, rolPermitido }) => {
       rol: usuario.rol,
       carrera: usuario.carrera?.nombre || null,
       fotoUrl: usuario.fotoUrl,
+      // true = el front debe mostrar el cambio obligatorio de contraseña antes de cualquier pantalla (RF35)
+      passwordTemporal: usuario.passwordTemporal,
     },
   };
 };
@@ -221,6 +239,7 @@ export const obtenerPerfilService = async (usuarioId) => {
       rol: true,
       fotoUrl: true,
       estado: true,
+      passwordTemporal: true,
       carreraId: true,
       carrera: { select: { nombre: true } },
     },
