@@ -19,5 +19,5 @@ export async function cerrarSesionService() {
   return api.post("/auth/logout");
 }
 
-// Compatibilidad con el layout actual del funcionario.
+// Mismo servicio con otro nombre; lo usa el layout del alumno
 export const logoutService = cerrarSesionService;

@@ -14,6 +14,11 @@ api.interceptors.response.use(
     const mensaje = error.response?.data?.message || 'No se pudo conectar con el servidor';
     const errorApi = new Error(mensaje);
     errorApi.status = error.response?.status;
+
+    // Si el backend rechazó un formulario, también manda qué falló en cada campo (ej: "El dígito verificador del rut no es válido")
+    const detalles = error.response?.data?.errorDetails;
+    errorApi.detalles = Array.isArray(detalles) ? detalles.map((detalle) => detalle.message || detalle.mensaje) : [];
+
     return Promise.reject(errorApi);
   }
 );
