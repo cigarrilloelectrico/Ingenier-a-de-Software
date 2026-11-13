@@ -57,11 +57,11 @@ export const funcionarioBodyValidation = Joi.object({
     "string.empty": `El campo apellidos no puede estar vacío`,
     "any.required": `El campo apellidos es obligatorio`,
   }),
-  correo: Joi.string().trim().lowercase().max(254).email().pattern(/@ubiobio\.cl$/).required().messages({
+  // TEMPORAL para pruebas: acepta cualquier correo. Para volver a exigir el institucional, agregar .pattern(/@ubiobio\.cl$/)
+  correo: Joi.string().trim().lowercase().max(254).email().required().messages({
     "string.base": `El campo correo debe ser un texto`,
     "string.max": `El correo no puede superar los 254 caracteres`,
     "string.email": `El formato del correo no es válido`,
-    "string.pattern.base": `El correo debe ser institucional (@ubiobio.cl)`,
     "string.empty": `El campo correo no puede estar vacío`,
     "any.required": `El campo correo es obligatorio`,
   }),

@@ -41,7 +41,7 @@ router.post(
 
 /**
  * Iniciar sesión como personal de la UBB: funcionario o administrador (RF31).
- * Usa la misma validación del funcionario: correo @ubiobio.cl y contraseña.
+ * Usa la misma validación del funcionario: correo y contraseña (de momento acepta cualquier dominio, ver auth.schema.js).
  */
 router.post(
   "/login/personal",
