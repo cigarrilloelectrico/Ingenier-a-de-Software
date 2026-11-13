@@ -101,17 +101,18 @@ const loginService = async ({ correo, password, rolesPermitidos }) => {
 
   if (!credencialesCorrectas) {
     if (usuario && tieneRolPermitido) {
-      const nuevosIntentos = (usuario.intentosFallidos || 0) + 1;
-      const dataUpdate = { intentosFallidos: nuevosIntentos };
-
-      if (nuevosIntentos >= 5) {
-        dataUpdate.bloqueoHastaAt = new Date(Date.now() + 15 * 60 * 1000);
-      }
-
-      await prisma.usuario.update({
+      // Suma atómica en la base de datos: con muchos intentos en paralelo, cada uno cuenta igual
+      const usuarioActualizado = await prisma.usuario.update({
         where: { usuarioId: usuario.usuarioId },
-        data: dataUpdate,
+        data: { intentosFallidos: { increment: 1 } },
       });
+
+      if (usuarioActualizado.intentosFallidos >= 5) {
+        await prisma.usuario.update({
+          where: { usuarioId: usuario.usuarioId },
+          data: { bloqueoHastaAt: new Date(Date.now() + 15 * 60 * 1000) },
+        });
+      }
     }
 
     // Mensaje unificado de seguridad según RF4
