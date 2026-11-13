@@ -13,7 +13,12 @@ export const hashToken = (token) => createHash("sha256").update(token).digest("h
  * and expiring them after 30 minutes of inactivity (RF4).
  * On success sets `req.user = { usuarioId, rol, recintoId, sesionId }` (recintoId is only set for funcionarios).
  */
-export const authMiddleware = async (req, res, next) => {
+export const authMiddleware = async (req, res, next) => verificarSesion(req, res, next, false);
+
+export const authPasswordTemporalMiddleware = async (req, res, next) =>
+  verificarSesion(req, res, next, true);
+
+const verificarSesion = async (req, res, next, permitirPasswordTemporal) => {
   const token = req.cookies?.accessToken;
 
   if (!token) {
@@ -29,7 +34,11 @@ export const authMiddleware = async (req, res, next) => {
 
   const sesion = await prisma.sesion.findUnique({
     where: { sesionId: payload.sesionId },
-    include: { usuario: { select: { usuarioId: true, rol: true, estado: true, recintoId: true } } },
+    include: {
+      usuario: {
+        select: { usuarioId: true, rol: true, estado: true, recintoId: true, passwordTemporal: true },
+      },
+    },
   });
 
   const now = new Date();
@@ -48,6 +57,10 @@ export const authMiddleware = async (req, res, next) => {
     return handleErrorClient(res, 401, "Acceso denegado. Cuenta inactiva o bloqueada.");
   }
 
+  if (sesion.usuario.passwordTemporal && !permitirPasswordTemporal) {
+    return handleErrorClient(res, 403, "Debe cambiar su contraseña temporal antes de continuar.");
+  }
+
   await prisma.sesion.update({
     where: { sesionId: sesion.sesionId },
     data: { ultimaActividadAt: now },
@@ -57,6 +70,7 @@ export const authMiddleware = async (req, res, next) => {
     usuarioId: sesion.usuario.usuarioId,
     rol: sesion.usuario.rol,
     recintoId: sesion.usuario.recintoId,
+    passwordTemporal: sesion.usuario.passwordTemporal,
     sesionId: sesion.sesionId,
   };
   next();

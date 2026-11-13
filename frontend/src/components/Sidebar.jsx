@@ -4,8 +4,9 @@ const ESTILO_ENLACE = "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm fo
 const ESTILO_ACTIVO = "bg-white/15 text-white";
 const ESTILO_INACTIVO = "text-blue-100 hover:bg-white/10 hover:text-white";
 
-// Barra lateral compartida: cada vista (funcionario, alumno, admin) le pasa su rol y sus enlaces
-export default function Sidebar({ rol, enlaces }) {
+// Barra lateral compartida: cada vista (funcionario, alumno, admin) le pasa su rol y sus enlaces.
+// Si recibe onCerrarSesion, muestra el botón para salir al final.
+export default function Sidebar({ rol, enlaces, onCerrarSesion }) {
   return (
     <aside className="sticky top-0 flex h-screen w-64 shrink-0 flex-col bg-blue-900 text-white">
       <div className="border-b border-white/10 px-6 py-5">
@@ -25,6 +26,18 @@ export default function Sidebar({ rol, enlaces }) {
           </NavLink>
         ))}
       </nav>
+
+      {onCerrarSesion && (
+        <div className="border-t border-white/10 p-3">
+          <button
+            type="button"
+            onClick={onCerrarSesion}
+            className={`${ESTILO_ENLACE} ${ESTILO_INACTIVO} w-full`}
+          >
+            Cerrar sesión
+          </button>
+        </div>
+      )}
     </aside>
   );
 }

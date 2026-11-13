@@ -6,6 +6,7 @@ import { prisma } from "../config/configDb.js";
 import { getJwtSecret, SESSION_MAX_MS, VERIFICATION_CODE_TTL_MS } from "../config/configEnv.js";
 import { hashToken } from "../middleware/auth.middleware.js";
 import { enviarCodigoVerificacion } from "./email.service.js";
+import { esHashAntiguo, hashearPassword, verificarPassword } from "../utils/hashPassword.js";
 
 const CODIGO_EXPIRACION_MS = VERIFICATION_CODE_TTL_MS;
 
@@ -62,7 +63,7 @@ export const registrarAlumnoService = async ({ correo }) => {
   };
 };
 
-const loginService = async ({ correo, password, rolPermitido }) => {
+const loginService = async ({ correo, password, rolesPermitidos }) => {
   const correoNormalizado = correo.trim().toLowerCase();
 
   const usuario = await prisma.usuario.findUnique({
@@ -85,13 +86,13 @@ const loginService = async ({ correo, password, rolPermitido }) => {
     };
   }
 
-  // 2. Validar existencia, rol permitido y contraseña con bcrypt
-  const tieneRolPermitido = usuario && usuario.rol === rolPermitido;
+  // 2. Validar existencia, rol permitido y contraseña con Argon2 o bcrypt antiguo
+  const tieneRolPermitido = usuario && rolesPermitidos.includes(usuario.rol);
   const tienePassword = Boolean(usuario?.passwordHash);
   let passwordValida = false;
 
   if (tieneRolPermitido && tienePassword) {
-    passwordValida = await bcrypt.compare(password, usuario.passwordHash);
+    passwordValida = await verificarPassword(password, usuario.passwordHash);
   }
 
   // Si falló el correo, el rol, la contraseña o la cuenta aún no está verificada
@@ -127,11 +128,37 @@ const loginService = async ({ correo, password, rolPermitido }) => {
     });
   }
 
+  // Migrar hashes bcrypt antiguos después de un login válido.
+  if (esHashAntiguo(usuario.passwordHash)) {
+    try {
+      await prisma.usuario.updateMany({
+        where: { usuarioId: usuario.usuarioId, passwordHash: usuario.passwordHash },
+        data: { passwordHash: await hashearPassword(password) },
+      });
+    } catch (errorMigracion) {
+      console.error("No se pudo migrar la contraseña a Argon2:", errorMigracion.message);
+    }
+  }
+
   // 4. Excepción explícita de cuenta bloqueada
   if (usuario.estado === "Bloqueado") {
     return {
       error: "Su cuenta ha sido bloqueada por acumulación de sanciones (strikes). Debe contactarse de manera presencial con Rectoría para solucionar su situación.",
       statusCode: 403,
+    };
+  }
+
+  if (usuario.estado === "Desactivado") {
+    return {
+      error: "Su cuenta fue desactivada. Contacte al administrador.",
+      statusCode: 403,
+    };
+  }
+
+  if (usuario.passwordTemporal && usuario.passwordExpiredAt && usuario.passwordExpiredAt < now) {
+    return {
+      error: "Su contraseña temporal caducó. Contacte al administrador.",
+      statusCode: 401,
     };
   }
 
@@ -184,15 +211,19 @@ const loginService = async ({ correo, password, rolPermitido }) => {
       rol: usuario.rol,
       carrera: usuario.carrera?.nombre || null,
       fotoUrl: usuario.fotoUrl,
+      passwordTemporal: usuario.passwordTemporal,
     },
   };
 };
 
 export const loginAlumnoService = (credentials) =>
-  loginService({ ...credentials, rolPermitido: "Alumno" });
+  loginService({ ...credentials, rolesPermitidos: ["Alumno"] });
 
 export const loginFuncionarioService = (credentials) =>
-  loginService({ ...credentials, rolPermitido: "Funcionario" });
+  loginService({ ...credentials, rolesPermitidos: ["Funcionario"] });
+
+export const loginPersonalService = (credentials) =>
+  loginService({ ...credentials, rolesPermitidos: ["Funcionario", "Administrador"] });
 
 /**
  * Servicio para cerrar la sesión en la base de datos.
@@ -221,6 +252,7 @@ export const obtenerPerfilService = async (usuarioId) => {
       rol: true,
       fotoUrl: true,
       estado: true,
+      passwordTemporal: true,
       carreraId: true,
       carrera: { select: { nombre: true } },
     },

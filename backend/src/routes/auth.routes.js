@@ -4,6 +4,7 @@ import {
   registrarAlumnoController,
   loginAlumnoController,
   loginFuncionarioController,
+  loginPersonalController,
   logoutController,
   perfilController,
 } from "../controllers/auth.controller.js";
@@ -13,7 +14,7 @@ import {
   loginSchema,
   registroAlumnoSchema,
 } from "../schemas/auth.schema.js";
-import { authMiddleware } from "../middleware/auth.middleware.js";
+import { authPasswordTemporalMiddleware } from "../middleware/auth.middleware.js";
 
 const router = Router();
 
@@ -39,14 +40,20 @@ router.post(
   loginFuncionarioController
 );
 
+router.post(
+  "/login/personal",
+  validate(loginFuncionarioSchema, "Datos de inicio de sesión inválidos."),
+  loginPersonalController
+);
+
 /**
  * Cerrar sesión activa.
  */
-router.post("/logout", authMiddleware, logoutController);
+router.post("/logout", authPasswordTemporalMiddleware, logoutController);
 
 /**
  * Obtener perfil del alumno logueado actualmente.
  */
-router.get("/me", authMiddleware, perfilController);
+router.get("/me", authPasswordTemporalMiddleware, perfilController);
 
 export default router;

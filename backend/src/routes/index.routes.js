@@ -5,6 +5,7 @@ import recintoRouter from "./recinto.routes.js";
 import avisoRouter from "./aviso.routes.js";
 import matchRouter from "./match.routes.js";
 import tipoObjetoRouter from "./tipoObjeto.routes.js";
+import funcionarioRouter from "./funcionario.routes.js";
 
 export function routerApi(app) {
   const router = Router();
@@ -14,6 +15,7 @@ export function routerApi(app) {
   router.use("/recintos", recintoRouter);
   router.use("/avisos", avisoRouter);
   router.use("/match", matchRouter);
+  router.use("/funcionarios", funcionarioRouter);
 
   app.use("/api", router);
 }
