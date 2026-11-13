@@ -16,18 +16,18 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d ubb_objetos_perdidos"]
+      # Por TCP y no por socket: en la primera inicialización Postgres arranca un servidor temporal solo por socket
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d ubb_objetos_perdidos"]
       interval: 5s
       timeout: 5s
       retries: 10
 
   backend:
     build: ./backend
-    # JWT_SECRET, EMAIL_* y cualquier otro secreto vienen de backend/.env (nunca se sube al repositorio)
-    env_file:
-      - path: ./backend/.env
-        required: false
-    # Estas variables mandan sobre backend/.env: dentro de Docker la base de datos es el servicio "db", no localhost
+    # JWT_SECRET, EMAIL_* y cualquier otro secreto vienen de backend/.env (nunca se sube al repositorio):
+    # el backend lo lee con dotenv desde /app/.env, que es el mismo archivo montado.
+    # Estas variables mandan sobre backend/.env (dotenv no pisa las que ya existen):
+    # dentro de Docker la base de datos es el servicio "db", no localhost
     environment:
       DB_HOST: db
       DB_PORT: 5432
