@@ -28,7 +28,7 @@ Con Docker el proyecto funciona igual en Linux, Windows y macOS. No hace falta i
 
 3. Abre:
    - Frontend: http://localhost:5173
-   - Backend: http://localhost:3000/api
+   - Backend: http://localhost:3000 (las rutas de la API están bajo `/api`, por ejemplo `/api/recintos`)
    - PostgreSQL (para DBeaver, pgAdmin, etc.): `localhost:5435`, usuario `postgres`, contraseña `postgres`, base `ubb_objetos_perdidos`
 
 Los cambios que hagas en el código se recargan solos, sin reiniciar los contenedores.
@@ -39,11 +39,21 @@ Los cambios que hagas en el código se recargan solos, sin reiniciar los contene
 |---|---|
 | Detener todo | `docker compose down` |
 | Cargar los datos de prueba | `docker compose exec backend npm run db:seed` |
-| Crear una migración tras cambiar un `.prisma` | `docker compose exec backend npx prisma migrate dev --name nombre-del-cambio` |
+| Crear una migración tras cambiar un `.prisma` | `docker compose exec backend sh -c "npx prisma migrate dev --name nombre-del-cambio && npx prisma generate"` |
 | Ver los logs del backend | `docker compose logs -f backend` |
 | Borrar la base de datos y empezar de cero | `docker compose down -v` |
 
 Si un `git pull` trae dependencias nuevas, no hay que hacer nada: al arrancar, cada contenedor detecta que cambió el `package-lock.json` y las reinstala.
+
+### Usuarios de prueba
+
+Después de cargar los datos de prueba, entra en http://localhost:5173/login con cualquiera de estos usuarios:
+
+| Rol | Correo | Contraseña |
+|---|---|---|
+| Administrador | `admin@ubiobio.cl` | `Administrador123!` |
+| Funcionario | `funcionario@ubiobio.cl` | `Funcionario123!` |
+| Alumno | `alumno@alumnos.ubiobio.cl` | `Alumno123!` |
 
 ### Si un puerto ya está ocupado
 
@@ -61,3 +71,8 @@ El frontend y el CORS del backend se ajustan solos al puerto elegido.
 
 - Instala Docker Desktop con el motor WSL 2 (la opción por defecto).
 - Los scripts `.sh` deben tener finales de línea LF: el `.gitattributes` del repositorio lo asegura al clonar.
+
+### Notas para Linux
+
+- Los contenedores corren con el usuario de id 1000, que es el de casi todos los equipos de escritorio. Si `id -u` te muestra otro número, el backend no podrá escribir en `backend/` (cliente de Prisma, fotos subidas).
+- Docker crea las carpetas `backend/node_modules` y `frontend/node_modules` de tu equipo con dueño root. Si además quieres correr `npm install` fuera de Docker (por ejemplo, para el autocompletado del editor), primero recupéralas con `sudo chown -R $USER backend/node_modules frontend/node_modules`.
