@@ -2,6 +2,7 @@ import {
   registrarAlumnoService,
   loginAlumnoService,
   loginFuncionarioService,
+  loginPersonalService,
   logoutService,
   obtenerPerfilService,
 } from "../services/auth.service.js";
@@ -61,6 +62,32 @@ export async function loginFuncionarioController(req, res) {
   try {
     const { correo, password } = req.body;
     const result = await loginFuncionarioService({ correo, password });
+
+    if (result.error) {
+      return handleErrorClient(res, result.statusCode || 400, result.error);
+    }
+
+    res.cookie("accessToken", result.token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: SESSION_MAX_MS,
+    });
+
+    return handleSuccess(res, 200, "Inicio de sesión exitoso.", result.usuario);
+  } catch (error) {
+    return handleErrorServer(res, 500, "Error interno al iniciar sesión.", error.message);
+  }
+}
+
+/**
+ * Inicia sesión para el personal de la UBB (funcionario o administrador).
+ * La respuesta trae el rol, para que el front lleve a cada uno a su vista.
+ */
+export async function loginPersonalController(req, res) {
+  try {
+    const { correo, password } = req.body;
+    const result = await loginPersonalService({ correo, password });
 
     if (result.error) {
       return handleErrorClient(res, result.statusCode || 400, result.error);

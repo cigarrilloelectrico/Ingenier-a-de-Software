@@ -5,6 +5,27 @@ async function main() {
   console.log('🌱 Cargando datos de prueba...');
   const passwordHash = await bcrypt.hash('Alumno123!', 10);
   const funcionarioPasswordHash = await bcrypt.hash('Funcionario123!', 10);
+  const administradorPasswordHash = await bcrypt.hash('Administrador123!', 10);
+
+  // Las cuentas de administrador no se crean desde la plataforma (RF31): esta es la de desarrollo
+  await prisma.usuario.upsert({
+    where: { correo: 'admin@ubiobio.cl' },
+    update: {
+      nombre: 'Rectoría',
+      apellidos: 'UBB',
+      rol: 'Administrador',
+      estado: 'Activo',
+      passwordHash: administradorPasswordHash,
+    },
+    create: {
+      correo: 'admin@ubiobio.cl',
+      rol: 'Administrador',
+      estado: 'Activo',
+      nombre: 'Rectoría',
+      apellidos: 'UBB',
+      passwordHash: administradorPasswordHash,
+    },
+  });
 
   const recinto = await prisma.recinto.upsert({
     where: { nombre: 'Campus Concepción' },

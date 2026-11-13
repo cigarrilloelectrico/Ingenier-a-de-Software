@@ -62,7 +62,8 @@ export const registrarAlumnoService = async ({ correo }) => {
   };
 };
 
-const loginService = async ({ correo, password, rolPermitido }) => {
+// rolesPermitidos: roles que pueden entrar por ese endpoint (ej: ["Funcionario", "Administrador"])
+const loginService = async ({ correo, password, rolesPermitidos }) => {
   const correoNormalizado = correo.trim().toLowerCase();
 
   const usuario = await prisma.usuario.findUnique({
@@ -86,7 +87,7 @@ const loginService = async ({ correo, password, rolPermitido }) => {
   }
 
   // 2. Validar existencia, rol permitido y contraseña con bcrypt
-  const tieneRolPermitido = usuario && usuario.rol === rolPermitido;
+  const tieneRolPermitido = usuario && rolesPermitidos.includes(usuario.rol);
   const tienePassword = Boolean(usuario?.passwordHash);
   let passwordValida = false;
 
@@ -207,10 +208,14 @@ const loginService = async ({ correo, password, rolPermitido }) => {
 };
 
 export const loginAlumnoService = (credentials) =>
-  loginService({ ...credentials, rolPermitido: "Alumno" });
+  loginService({ ...credentials, rolesPermitidos: ["Alumno"] });
 
 export const loginFuncionarioService = (credentials) =>
-  loginService({ ...credentials, rolPermitido: "Funcionario" });
+  loginService({ ...credentials, rolesPermitidos: ["Funcionario"] });
+
+// Personal de la UBB (@ubiobio.cl): funcionarios y administradores entran por el mismo formulario
+export const loginPersonalService = (credentials) =>
+  loginService({ ...credentials, rolesPermitidos: ["Funcionario", "Administrador"] });
 
 /**
  * Servicio para cerrar la sesión en la base de datos.

@@ -3,6 +3,7 @@ import {
   registrarAlumnoController,
   loginAlumnoController,
   loginFuncionarioController,
+  loginPersonalController,
   logoutController,
   perfilController,
 } from "../controllers/auth.controller.js";
@@ -36,6 +37,16 @@ router.post(
   "/login/funcionario",
   validate(loginFuncionarioSchema, "Datos de inicio de sesión inválidos."),
   loginFuncionarioController
+);
+
+/**
+ * Iniciar sesión como personal de la UBB: funcionario o administrador (RF31).
+ * Usa la misma validación del funcionario: correo @ubiobio.cl y contraseña.
+ */
+router.post(
+  "/login/personal",
+  validate(loginFuncionarioSchema, "Datos de inicio de sesión inválidos."),
+  loginPersonalController
 );
 
 /**
