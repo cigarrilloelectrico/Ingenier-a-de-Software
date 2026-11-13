@@ -12,6 +12,11 @@ export default function Home() {
           <span>Registrar Avisos y Objetos (Pendiente)</span>
         </li>
         <li>
+          <Link to="/login" style={{ color: '#2563eb', fontWeight: 'bold' }}>
+            Iniciar sesión
+          </Link>
+        </li>
+        <li>
           <Link to="/alumno/registro" style={{ color: '#2563eb', fontWeight: 'bold' }}>
             Registrarse como alumno
           </Link>

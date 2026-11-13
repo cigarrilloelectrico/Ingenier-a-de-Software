@@ -5,12 +5,14 @@ import RegistroObjeto from './components/RegistroObjeto';
 import FuncionarioRoutes from './features/funcionario/FuncionarioRoutes';
 import RegistroAlumno from './features/alumno/pages/RegistroAlumno';
 import AdminRoutes from './features/admin/AdminRoutes';
+import Login from './pages/Login';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/motor-coincidencias" element={<MatchEngine />} />
         <Route path="/registrar-objeto" element={<RegistroObjeto />} />
         <Route path="/funcionario/*" element={<FuncionarioRoutes />} />
