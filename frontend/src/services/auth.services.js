@@ -2,22 +2,22 @@ import api from "./api";
 
 // Datos del usuario de la sesión actual (incluye rol y passwordTemporal)
 export async function obtenerPerfilService() {
-  const respuesta = await api.get(`/auth/me`);
-  return respuesta;
+  return api.get("/auth/me");
 }
 
 // Los alumnos entran por /auth/login; el personal de la UBB (funcionarios y administradores) por /auth/login/personal
 export async function iniciarSesionService({ correo, password }) {
   const correoNormalizado = correo.trim().toLowerCase();
+  const ruta = correoNormalizado.endsWith("@alumnos.ubiobio.cl")
+    ? "/auth/login"
+    : "/auth/login/personal";
 
-  let ruta = `/auth/login/personal`;
-  if (correoNormalizado.endsWith("@alumnos.ubiobio.cl")) ruta = `/auth/login`;
-
-  const respuesta = await api.post(ruta, { correo: correoNormalizado, password });
-  return respuesta;
+  return api.post(ruta, { correo: correoNormalizado, password });
 }
 
 export async function cerrarSesionService() {
-  const respuesta = await api.post(`/auth/logout`);
-  return respuesta;
+  return api.post("/auth/logout");
 }
+
+// Compatibilidad con el layout actual del funcionario.
+export const logoutService = cerrarSesionService;

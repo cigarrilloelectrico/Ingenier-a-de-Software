@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { urlFotoObjeto } from "../services/inventario.services";
 
 // Color de la etiqueta según el estado del objeto
@@ -31,7 +32,11 @@ export default function ObjetoCard({ objeto }) {
 
       <div className="flex flex-1 flex-col gap-2 p-4">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-semibold text-slate-900">{objeto.tipoObjeto.nombre}</h3>
+          <div>
+            <h3 className="font-semibold text-slate-900">{objeto.tipoObjeto.nombre}</h3>
+            {/* Necesario para distinguir dos objetos iguales (ej. dos mochilas negras) */}
+            <p className="text-xs text-slate-400">#{objeto.objetoId}</p>
+          </div>
           <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${ESTILOS_ESTADO[objeto.estado]}`}>
             {objeto.estado}
           </span>
@@ -42,7 +47,7 @@ export default function ObjetoCard({ objeto }) {
         </p>
         <p className="line-clamp-3 text-sm text-slate-600">{objeto.descripcion}</p>
 
-        <dl className="mt-auto grid grid-cols-2 gap-2 border-t border-slate-100 pt-3 text-xs">
+        <dl className="grid grid-cols-2 gap-2 border-t border-slate-100 pt-3 text-xs">
           <div>
             <dt className="text-slate-400">Recinto</dt>
             <dd className="font-medium text-slate-700">{objeto.recinto.nombre}</dd>
@@ -58,6 +63,16 @@ export default function ObjetoCard({ objeto }) {
             </dd>
           </div>
         </dl>
+
+        {/* RF20: lleva el id del objeto directo a la búsqueda de coincidencias */}
+        {objeto.estado === "Disponible" && (
+          <Link
+            to={`/funcionario/coincidencias?objetoId=${objeto.objetoId}`}
+            className="mt-1 block rounded-lg bg-blue-50 px-3 py-1.5 text-center text-xs font-medium text-blue-700 hover:bg-blue-100"
+          >
+            Ver coincidencias
+          </Link>
+        )}
       </div>
     </article>
   );

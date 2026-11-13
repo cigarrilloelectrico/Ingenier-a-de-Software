@@ -1,15 +1,37 @@
-import { Route, Routes } from "react-router-dom";
-import Home from "../pages/Home";
-import MatchEngine from "../pages/MatchEngine";
+import { Navigate, Route, Routes } from "react-router-dom";
+import Login from "../pages/Login";
+import RutaProtegida from "../components/RutaProtegida";
 import FuncionarioRoutes from "../features/funcionario/FuncionarioRoutes";
+import AlumnoRoutes from "../features/alumno/AlumnoRoutes";
+import RegistroAlumno from "../features/alumno/pages/RegistroAlumno";
+import AdminRoutes from "../features/admin/AdminRoutes";
 
 // Todas las rutas de la app; cada vista (funcionario, alumno, admin) se monta con su prefijo
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/motor-coincidencias" element={<MatchEngine />} />
-      <Route path="/funcionario/*" element={<FuncionarioRoutes />} />
+      <Route path="/" element={<Login />} />
+      <Route path="/login" element={<Login />} />
+
+      {/* RF1: registro de alumno. Pendiente: verificar código (RF2) y definir contraseña (RF3). */}
+      <Route path="/alumno/registro" element={<RegistroAlumno />} />
+
+      {/* Solo con sesión de funcionario */}
+      <Route element={<RutaProtegida rol="Funcionario" />}>
+        <Route path="/funcionario/*" element={<FuncionarioRoutes />} />
+      </Route>
+
+      {/* Solo con sesión de alumno */}
+      <Route element={<RutaProtegida rol="Alumno" />}>
+        <Route path="/alumno/*" element={<AlumnoRoutes />} />
+      </Route>
+
+      {/* Solo con sesión de administrador */}
+      <Route element={<RutaProtegida rol="Administrador" />}>
+        <Route path="/admin/*" element={<AdminRoutes />} />
+      </Route>
+
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }

@@ -61,8 +61,14 @@ export function useInventario() {
   };
 
   const limpiarFiltros = () => {
+    const yaEstanLimpios = Object.keys(FILTROS_INICIALES).every(
+      (nombre) => filtros[nombre] === FILTROS_INICIALES[nombre]
+    );
+
+    if (yaEstanLimpios) return;
+
     setLoading(true);
-    setFiltros(FILTROS_INICIALES);
+    setFiltros({ ...FILTROS_INICIALES });
   };
 
   const paginaSiguiente = () => {

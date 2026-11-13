@@ -45,7 +45,11 @@ export default function Inventario() {
         <section className="rounded-xl bg-white p-5 shadow-sm ring-1 ring-slate-200">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-slate-900">Filtros</h2>
-            <button onClick={limpiarFiltros} className="text-sm font-medium text-blue-700 hover:text-blue-900">
+            <button
+              onClick={limpiarFiltros}
+              disabled={loading}
+              className="text-sm font-medium text-blue-700 hover:text-blue-900 disabled:cursor-not-allowed disabled:opacity-50"
+            >
               Limpiar filtros
             </button>
           </div>
