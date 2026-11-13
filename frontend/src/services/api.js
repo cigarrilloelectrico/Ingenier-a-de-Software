@@ -12,7 +12,13 @@ api.interceptors.response.use(
   // Si falla, lanzamos el mensaje que manda el backend (ej: "Solo puedes modificar objetos de tu recinto.")
   (error) => {
     const mensaje = error.response?.data?.message || 'No se pudo conectar con el servidor';
-    return Promise.reject(new Error(mensaje));
+    const errorConMensaje = new Error(mensaje);
+
+    // Si el backend rechazó un formulario, también manda qué falló en cada campo (ej: "El dígito verificador del rut no es válido")
+    const detalles = error.response?.data?.errorDetails;
+    errorConMensaje.detalles = Array.isArray(detalles) ? detalles.map((detalle) => detalle.message || detalle.mensaje) : [];
+
+    return Promise.reject(errorConMensaje);
   }
 );
 

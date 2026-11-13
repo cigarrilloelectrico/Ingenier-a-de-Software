@@ -1,4 +1,3 @@
-"use strict";
 import { prisma } from "../config/configDb.js";
 
 export async function visualizarInventarioService({ pagina = 1, recintoId, tipoObjetoId, estado, fechaDesde, fechaHasta }) {
@@ -44,8 +43,8 @@ export async function registrarObjetoService(funcionarioId, recintoFuncionarioId
         descripcion,
         fechaRecepcion,
         entregadoPor,
-        fotos: { create: fotosUrl.map((fotoUrl) => ({ fotoUrl })) },
-      },
+        fotos: { create: fotosUrl.map((fotoUrl) => ({ fotoUrl })) }, // arreglo strings a arreglo objetos
+            },
       include: { fotos: true },
     });
   } catch (error) {

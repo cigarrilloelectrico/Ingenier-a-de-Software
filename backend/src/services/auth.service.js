@@ -1,11 +1,70 @@
 import bcrypt from "bcryptjs";
+import { randomInt } from "node:crypto";
 import jwt from "jsonwebtoken";
 import { randomUUID } from "node:crypto";
 import { prisma } from "../config/configDb.js";
-import { getJwtSecret, SESSION_MAX_MS } from "../config/configEnv.js";
+import { getJwtSecret, SESSION_MAX_MS, VERIFICATION_CODE_TTL_MS } from "../config/configEnv.js";
 import { hashToken } from "../middleware/auth.middleware.js";
+import { enviarCodigoVerificacion } from "./email.service.js";
+import { esHashAntiguo, hashearPassword, verificarPassword } from "../utils/hashPassword.js";
 
-const loginService = async ({ correo, password, rolPermitido }) => {
+const CODIGO_EXPIRACION_MS = VERIFICATION_CODE_TTL_MS;
+
+// Registra un alumno no verificado y envía el código de verificación por correo
+export const registrarAlumnoService = async ({ correo }) => {
+  // 1. Normalizar el correo y verificar que no esté registrado
+  const correoNormalizado = correo.trim().toLowerCase();
+  const existente = await prisma.usuario.findUnique({ where: { correo: correoNormalizado } });
+
+  if (existente) {
+    return {
+      error: "El correo electrónico ya está registrado.",
+      statusCode: 409,
+    };
+  }
+
+  // 2. Generar y proteger el código de verificación
+  const codigo = String(randomInt(100000, 1000000));
+  const codigoHash = await bcrypt.hash(codigo, 10);
+
+  // 3. Crear la cuenta y guardar el código con una vigencia de 15 minutos
+  const usuario = await prisma.usuario.create({
+    data: {
+      correo: correoNormalizado,
+      rol: "Alumno",
+      estado: "NoVerificado",
+      segundoFactorActivo: true,
+      codigosVerificacion: {
+        create: {
+          codigoHash,
+          proposito: "VerificarCorreo",
+          expiraAt: new Date(Date.now() + CODIGO_EXPIRACION_MS),
+        },
+      },
+    },
+    select: { usuarioId: true, correo: true, estado: true },
+  });
+
+  // 4. Enviar el código; si falla, evitar dejar una cuenta sin posibilidad de verificar
+  try {
+    await enviarCodigoVerificacion({ correo: usuario.correo, codigo });
+  } catch (error) {
+    await prisma.usuario.delete({ where: { usuarioId: usuario.usuarioId } });
+    throw error;
+  }
+
+  // 5. No devolver el código ni el hash al cliente
+  return {
+    usuario: {
+      usuarioId: usuario.usuarioId,
+      correo: usuario.correo,
+      estado: usuario.estado,
+    },
+  };
+};
+
+// rolesPermitidos: roles que pueden entrar por ese endpoint (ej: ["Funcionario", "Administrador"])
+const loginService = async ({ correo, password, rolesPermitidos }) => {
   const correoNormalizado = correo.trim().toLowerCase();
 
   const usuario = await prisma.usuario.findUnique({
@@ -28,13 +87,13 @@ const loginService = async ({ correo, password, rolPermitido }) => {
     };
   }
 
-  // 2. Validar existencia, rol permitido y contraseña con bcrypt
-  const tieneRolPermitido = usuario && usuario.rol === rolPermitido;
+  // 2. Validar existencia, rol permitido y contraseña (argon2, o bcrypt en cuentas antiguas)
+  const tieneRolPermitido = usuario && rolesPermitidos.includes(usuario.rol);
   const tienePassword = Boolean(usuario?.passwordHash);
   let passwordValida = false;
 
   if (tieneRolPermitido && tienePassword) {
-    passwordValida = await bcrypt.compare(password, usuario.passwordHash);
+    passwordValida = await verificarPassword(password, usuario.passwordHash);
   }
 
   // Si falló el correo, el rol, la contraseña o la cuenta aún no está verificada
@@ -42,17 +101,18 @@ const loginService = async ({ correo, password, rolPermitido }) => {
 
   if (!credencialesCorrectas) {
     if (usuario && tieneRolPermitido) {
-      const nuevosIntentos = (usuario.intentosFallidos || 0) + 1;
-      const dataUpdate = { intentosFallidos: nuevosIntentos };
-
-      if (nuevosIntentos >= 5) {
-        dataUpdate.bloqueoHastaAt = new Date(Date.now() + 15 * 60 * 1000);
-      }
-
-      await prisma.usuario.update({
+      // Suma atómica en la base de datos: con muchos intentos en paralelo, cada uno cuenta igual
+      const usuarioActualizado = await prisma.usuario.update({
         where: { usuarioId: usuario.usuarioId },
-        data: dataUpdate,
+        data: { intentosFallidos: { increment: 1 } },
       });
+
+      if (usuarioActualizado.intentosFallidos >= 5) {
+        await prisma.usuario.update({
+          where: { usuarioId: usuario.usuarioId },
+          data: { bloqueoHastaAt: new Date(Date.now() + 15 * 60 * 1000) },
+        });
+      }
     }
 
     // Mensaje unificado de seguridad según RF4
@@ -70,6 +130,19 @@ const loginService = async ({ correo, password, rolPermitido }) => {
     });
   }
 
+  // La contraseña es correcta: si estaba guardada con bcrypt se regenera con argon2, sin que el usuario note nada.
+  // Solo si nadie la cambió en ese mismo instante (el where compara el hash leído), y si falla no impide entrar
+  if (esHashAntiguo(usuario.passwordHash)) {
+    try {
+      await prisma.usuario.updateMany({
+        where: { usuarioId: usuario.usuarioId, passwordHash: usuario.passwordHash },
+        data: { passwordHash: await hashearPassword(password) },
+      });
+    } catch (errorMigracion) {
+      console.error("No se pudo migrar la contraseña a argon2:", errorMigracion.message);
+    }
+  }
+
   // 4. Excepción explícita de cuenta bloqueada
   if (usuario.estado === "Bloqueado") {
     return {
@@ -78,7 +151,15 @@ const loginService = async ({ correo, password, rolPermitido }) => {
     };
   }
 
-  // 5. Verificar que la cuenta esté activa
+  // 5. Cuenta de funcionario desactivada por el administrador (RF37)
+  if (usuario.estado === "Desactivado") {
+    return {
+      error: "Su cuenta fue desactivada. Contacte al administrador.",
+      statusCode: 403,
+    };
+  }
+
+  // 6. Verificar que la cuenta esté activa
   if (usuario.estado !== "Activo") {
     return {
       error: "Acceso denegado. La cuenta no se encuentra activa.",
@@ -86,7 +167,15 @@ const loginService = async ({ correo, password, rolPermitido }) => {
     };
   }
 
-  // 6. Crear la sesión en la base de datos
+  // 7. La contraseña temporal del funcionario caduca a los 7 días (RF35)
+  if (usuario.passwordTemporal && usuario.passwordExpiredAt && usuario.passwordExpiredAt < now) {
+    return {
+      error: "Su contraseña temporal caducó. Contacte al administrador.",
+      statusCode: 401,
+    };
+  }
+
+  // 8. Crear la sesión en la base de datos
   const tempHash = `temp-${randomUUID()}`;
   const expiraAt = new Date(Date.now() + SESSION_MAX_MS);
 
@@ -127,15 +216,21 @@ const loginService = async ({ correo, password, rolPermitido }) => {
       rol: usuario.rol,
       carrera: usuario.carrera?.nombre || null,
       fotoUrl: usuario.fotoUrl,
+      // true = el front debe mostrar el cambio obligatorio de contraseña antes de cualquier pantalla (RF35)
+      passwordTemporal: usuario.passwordTemporal,
     },
   };
 };
 
 export const loginAlumnoService = (credentials) =>
-  loginService({ ...credentials, rolPermitido: "Alumno" });
+  loginService({ ...credentials, rolesPermitidos: ["Alumno"] });
 
 export const loginFuncionarioService = (credentials) =>
-  loginService({ ...credentials, rolPermitido: "Funcionario" });
+  loginService({ ...credentials, rolesPermitidos: ["Funcionario"] });
+
+// Personal de la UBB (@ubiobio.cl): funcionarios y administradores entran por el mismo formulario
+export const loginPersonalService = (credentials) =>
+  loginService({ ...credentials, rolesPermitidos: ["Funcionario", "Administrador"] });
 
 /**
  * Servicio para cerrar la sesión en la base de datos.
@@ -164,6 +259,7 @@ export const obtenerPerfilService = async (usuarioId) => {
       rol: true,
       fotoUrl: true,
       estado: true,
+      passwordTemporal: true,
       carreraId: true,
       carrera: { select: { nombre: true } },
     },
