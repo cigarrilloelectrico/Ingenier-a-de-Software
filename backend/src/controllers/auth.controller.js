@@ -1,4 +1,3 @@
-"use strict";
 import {
   registrarAlumnoService,
   loginAlumnoService,
@@ -81,6 +80,10 @@ export async function loginFuncionarioController(req, res) {
   }
 }
 
+/**
+ * Inicia sesión para el personal de la UBB (funcionario o administrador).
+ * La respuesta trae el rol, para que el front lleve a cada uno a su vista.
+ */
 export async function loginPersonalController(req, res) {
   try {
     const { correo, password } = req.body;

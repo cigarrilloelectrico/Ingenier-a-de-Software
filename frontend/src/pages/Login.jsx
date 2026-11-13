@@ -32,7 +32,6 @@ export default function Login() {
     evento.preventDefault();
     setEnviando(true);
     setError(null);
-
     try {
       const respuesta = await iniciarSesionService({ correo, password });
       navigate(rutaInicioPorRol(respuesta.data.rol), { replace: true });
@@ -44,10 +43,11 @@ export default function Login() {
 
   return (
     <div className="flex min-h-screen bg-slate-50">
+      {/* Panel de marca, con el mismo azul de la barra lateral */}
       <aside className="hidden w-96 shrink-0 flex-col justify-between bg-blue-900 p-10 text-white lg:flex">
         <div>
           <p className="text-2xl font-bold tracking-wide">UBBICA</p>
-          <p className="text-sm text-blue-200">Plataforma de objetos perdidos UBB</p>
+          <p className="text-sm text-blue-200">Objetos Perdidos UBB</p>
         </div>
         <p className="text-lg leading-relaxed text-blue-100">
           Los objetos perdidos y encontrados de la Universidad del Bío-Bío, en un solo lugar.
@@ -92,7 +92,7 @@ export default function Login() {
                 Regístrate
               </Link>
             </p>
-            <p>¿Primer ingreso como funcionario? Usa la contraseña temporal que te llegó por correo.</p>
+            <p>¿Primer ingreso como funcionario? Usa la contraseña de 6 dígitos que te llegó por correo.</p>
           </div>
         </div>
       </main>

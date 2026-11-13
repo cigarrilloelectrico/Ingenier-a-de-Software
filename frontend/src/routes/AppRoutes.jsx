@@ -4,6 +4,7 @@ import RutaProtegida from "../components/RutaProtegida";
 import FuncionarioRoutes from "../features/funcionario/FuncionarioRoutes";
 import AlumnoRoutes from "../features/alumno/AlumnoRoutes";
 import RegistroAlumno from "../features/alumno/pages/RegistroAlumno";
+import AdminRoutes from "../features/admin/AdminRoutes";
 
 // Todas las rutas de la app; cada vista (funcionario, alumno, admin) se monta con su prefijo
 export default function AppRoutes() {
@@ -23,6 +24,11 @@ export default function AppRoutes() {
       {/* Solo con sesión de alumno */}
       <Route element={<RutaProtegida rol="Alumno" />}>
         <Route path="/alumno/*" element={<AlumnoRoutes />} />
+      </Route>
+
+      {/* Solo con sesión de administrador */}
+      <Route element={<RutaProtegida rol="Administrador" />}>
+        <Route path="/admin/*" element={<AdminRoutes />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

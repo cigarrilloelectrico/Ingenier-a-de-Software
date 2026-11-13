@@ -1,4 +1,3 @@
-"use strict";
 import { Router } from "express";
 import {
   registrarAlumnoController,
@@ -40,6 +39,10 @@ router.post(
   loginFuncionarioController
 );
 
+/**
+ * Iniciar sesión como personal de la UBB: funcionario o administrador (RF31).
+ * Usa la misma validación del funcionario: correo @ubiobio.cl y contraseña.
+ */
 router.post(
   "/login/personal",
   validate(loginFuncionarioSchema, "Datos de inicio de sesión inválidos."),
@@ -48,11 +51,13 @@ router.post(
 
 /**
  * Cerrar sesión activa.
+ * Abierta también a quien tiene contraseña temporal, para que pueda salir sin cambiarla.
  */
 router.post("/logout", authPasswordTemporalMiddleware, logoutController);
 
 /**
- * Obtener perfil del alumno logueado actualmente.
+ * Obtener perfil del usuario logueado actualmente.
+ * Abierta también a quien tiene contraseña temporal: el front lee `passwordTemporal` para mostrar el popup de cambio.
  */
 router.get("/me", authPasswordTemporalMiddleware, perfilController);
 

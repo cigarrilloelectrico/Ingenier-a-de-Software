@@ -1,4 +1,3 @@
-"use strict";
 import { prisma } from "../src/config/configDb.js";
 
 // Datos de prueba para ver el inventario en desarrollo. Se puede correr varias veces sin duplicar datos.

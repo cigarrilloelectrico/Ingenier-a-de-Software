@@ -1,0 +1,2 @@
+# Los scripts .sh corren dentro de contenedores Linux: mantienen finales de línea LF aunque se clone en Windows
+*.sh text eol=lf

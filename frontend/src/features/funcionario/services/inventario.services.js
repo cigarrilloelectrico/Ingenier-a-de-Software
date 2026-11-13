@@ -15,7 +15,13 @@ export async function actualizarObjetoService(id, datos) {
   return res;
 }
 
-// La foto la descarga el <img> del navegador, no axios; por eso solo se arma la URL con la base de axios
+// La foto la descarga el <img> del navegador, no axios; por eso solo se arma la URL
+// El backend sirve las fotos fuera de /api (express.static en /uploads), así que se quita /api de la base
 export function urlFotoObjeto(nombreFoto) {
-  return `${api.defaults.baseURL}/inventario/fotos/${nombreFoto}`;
+  let urlBackend = api.defaults.baseURL;
+
+  if (urlBackend.endsWith("/api")) {
+    urlBackend = urlBackend.slice(0, -"/api".length);
+  }
+  return `${urlBackend}/uploads/${nombreFoto}`;
 }

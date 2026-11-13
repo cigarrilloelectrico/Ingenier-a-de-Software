@@ -1,0 +1,70 @@
+# Entorno de desarrollo local: PostgreSQL + backend + frontend.
+# Funciona igual en Linux, Windows y macOS. Uso: docker compose up --build (ver README.md)
+#
+# Los puertos del computador se pueden cambiar con variables en un .env junto a este archivo (o en la terminal):
+#   DB_HOST_PORT (por defecto 5435), BACKEND_HOST_PORT (por defecto 3000), FRONTEND_HOST_PORT (por defecto 5173)
+
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ubb_objetos_perdidos
+    ports:
+      - "${DB_HOST_PORT:-5435}:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      # Por TCP y no por socket: en la primera inicialización Postgres arranca un servidor temporal solo por socket
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d ubb_objetos_perdidos"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    # JWT_SECRET, EMAIL_* y cualquier otro secreto vienen de backend/.env (nunca se sube al repositorio):
+    # el backend lo lee con dotenv desde /app/.env, que es el mismo archivo montado.
+    # Estas variables mandan sobre backend/.env (dotenv no pisa las que ya existen):
+    # dentro de Docker la base de datos es el servicio "db", no localhost
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USERNAME: postgres
+      DB_PASSWORD: postgres
+      DATABASE: ubb_objetos_perdidos
+      PORT: 3000
+      CORS_ORIGIN: http://localhost:${FRONTEND_HOST_PORT:-5173}
+      # Windows no avisa a los contenedores cuando cambia un archivo: se revisan cada 500 ms para que la recarga funcione
+      CHOKIDAR_USEPOLLING: "true"
+      CHOKIDAR_INTERVAL: "500"
+    ports:
+      - "${BACKEND_HOST_PORT:-3000}:3000"
+    volumes:
+      - ./backend:/app
+      # node_modules vive solo dentro de Linux: así no se mezclan binarios nativos de Windows o macOS
+      - backend_node_modules:/app/node_modules
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build: ./frontend
+    environment:
+      # El navegador corre en el computador, así que llega al backend por el puerto publicado
+      VITE_BASE_URL: http://localhost:${BACKEND_HOST_PORT:-3000}/api
+      CHOKIDAR_USEPOLLING: "true"
+      CHOKIDAR_INTERVAL: "500"
+    ports:
+      - "${FRONTEND_HOST_PORT:-5173}:5173"
+    volumes:
+      - ./frontend:/app
+      - frontend_node_modules:/app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  db_data:
+  backend_node_modules:
+  frontend_node_modules:

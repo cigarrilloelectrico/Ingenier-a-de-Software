@@ -4,6 +4,7 @@ import {
   EMAIL_PASS,
   EMAIL_PORT,
   EMAIL_USER,
+  EMAIL_FROM,
 } from "../config/configEnv.js";
 
 let transporter;
@@ -28,7 +29,7 @@ function getTransporter() {
 
 export async function enviarCodigoVerificacion({ correo, codigo }) {
   await getTransporter().sendMail({
-    from: EMAIL_USER,
+    from: EMAIL_FROM,
     to: correo,
     subject: "Verifica tu cuenta en UBBICA",
     text: `Hola:
@@ -43,4 +44,25 @@ export async function enviarCodigoVerificacion({ correo, codigo }) {
   Equipo UBBICA`,
   });
 
+}
+
+// Aviso de cuenta de funcionario creada con su contraseña temporal de 6 dígitos (RF35)
+export async function enviarPasswordTemporal({ correo, nombre, claveTemporal }) {
+  await getTransporter().sendMail({
+    from: EMAIL_FROM,
+    to: correo,
+    subject: "Tu cuenta de funcionario en UBBICA",
+    text: `Hola ${nombre}:
+
+  Se creó tu cuenta de funcionario en UBBICA.
+
+  Tu contraseña temporal es: ${claveTemporal}
+
+  Úsala para ingresar con tu correo institucional. En tu primer ingreso deberás reemplazarla por una contraseña propia.
+
+  La contraseña temporal vence en 7 días. Si vence o la pierdes, contacta al administrador.
+
+  Saludos,
+  Equipo UBBICA`,
+  });
 }

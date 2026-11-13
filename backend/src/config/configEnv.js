@@ -23,8 +23,12 @@ export const PORT = Number(process.env.PORT) || 3000;
 export const HOST = process.env.HOST || 'localhost';
 export const EMAIL_USER = process.env.EMAIL_USER;
 export const EMAIL_PASS = process.env.EMAIL_PASS;
+// SMTP server used to send emails (Gmail by default: port 587 upgrades to TLS with STARTTLS).
+// With Resend: EMAIL_HOST=smtp.resend.com, EMAIL_PORT=465, EMAIL_USER=resend, EMAIL_PASS=<API key>
 export const EMAIL_HOST = process.env.EMAIL_HOST || "smtp.gmail.com";
 export const EMAIL_PORT = Number(process.env.EMAIL_PORT) || 587;
+// Sender address. Required with Resend (an address on the verified domain); with Gmail it defaults to EMAIL_USER
+export const EMAIL_FROM = process.env.EMAIL_FROM || process.env.EMAIL_USER;
 export const VERIFICATION_CODE_TTL_MS = 15 * 60 * 1000;
 
 export const getJwtSecret = () => required('JWT_SECRET');

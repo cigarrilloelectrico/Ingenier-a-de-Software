@@ -1,10 +1,31 @@
 import bcrypt from 'bcryptjs';
 import { prisma } from './src/config/configDb.js';
+import { hashearPassword } from './src/utils/hashPassword.js';
 
 async function main() {
   console.log('Cargando datos de prueba...');
   const passwordHash = await bcrypt.hash('Alumno123!', 10);
   const funcionarioPasswordHash = await bcrypt.hash('Funcionario123!', 10);
+  const administradorPasswordHash = await hashearPassword('Administrador123!');
+
+  await prisma.usuario.upsert({
+    where: { correo: 'admin@ubiobio.cl' },
+    update: {
+      nombre: 'Rectoría',
+      apellidos: 'UBB',
+      rol: 'Administrador',
+      estado: 'Activo',
+      passwordHash: administradorPasswordHash,
+    },
+    create: {
+      correo: 'admin@ubiobio.cl',
+      rol: 'Administrador',
+      estado: 'Activo',
+      nombre: 'Rectoría',
+      apellidos: 'UBB',
+      passwordHash: administradorPasswordHash,
+    },
+  });
 
   const recintoCas = await prisma.recinto.upsert({
     where: { nombre: 'Casino' }, update: {},

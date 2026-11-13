@@ -63,6 +63,7 @@ export const registrarAlumnoService = async ({ correo }) => {
   };
 };
 
+// rolesPermitidos: roles que pueden entrar por ese endpoint (ej: ["Funcionario", "Administrador"])
 const loginService = async ({ correo, password, rolesPermitidos }) => {
   const correoNormalizado = correo.trim().toLowerCase();
 
@@ -86,7 +87,7 @@ const loginService = async ({ correo, password, rolesPermitidos }) => {
     };
   }
 
-  // 2. Validar existencia, rol permitido y contraseña con Argon2 o bcrypt antiguo
+  // 2. Validar existencia, rol permitido y contraseña (argon2, o bcrypt en cuentas antiguas)
   const tieneRolPermitido = usuario && rolesPermitidos.includes(usuario.rol);
   const tienePassword = Boolean(usuario?.passwordHash);
   let passwordValida = false;
@@ -100,17 +101,18 @@ const loginService = async ({ correo, password, rolesPermitidos }) => {
 
   if (!credencialesCorrectas) {
     if (usuario && tieneRolPermitido) {
-      const nuevosIntentos = (usuario.intentosFallidos || 0) + 1;
-      const dataUpdate = { intentosFallidos: nuevosIntentos };
-
-      if (nuevosIntentos >= 5) {
-        dataUpdate.bloqueoHastaAt = new Date(Date.now() + 15 * 60 * 1000);
-      }
-
-      await prisma.usuario.update({
+      // Suma atómica en la base de datos: con muchos intentos en paralelo, cada uno cuenta igual
+      const usuarioActualizado = await prisma.usuario.update({
         where: { usuarioId: usuario.usuarioId },
-        data: dataUpdate,
+        data: { intentosFallidos: { increment: 1 } },
       });
+
+      if (usuarioActualizado.intentosFallidos >= 5) {
+        await prisma.usuario.update({
+          where: { usuarioId: usuario.usuarioId },
+          data: { bloqueoHastaAt: new Date(Date.now() + 15 * 60 * 1000) },
+        });
+      }
     }
 
     // Mensaje unificado de seguridad según RF4
@@ -128,7 +130,8 @@ const loginService = async ({ correo, password, rolesPermitidos }) => {
     });
   }
 
-  // Migrar hashes bcrypt antiguos después de un login válido.
+  // La contraseña es correcta: si estaba guardada con bcrypt se regenera con argon2, sin que el usuario note nada.
+  // Solo si nadie la cambió en ese mismo instante (el where compara el hash leído), y si falla no impide entrar
   if (esHashAntiguo(usuario.passwordHash)) {
     try {
       await prisma.usuario.updateMany({
@@ -136,7 +139,7 @@ const loginService = async ({ correo, password, rolesPermitidos }) => {
         data: { passwordHash: await hashearPassword(password) },
       });
     } catch (errorMigracion) {
-      console.error("No se pudo migrar la contraseña a Argon2:", errorMigracion.message);
+      console.error("No se pudo migrar la contraseña a argon2:", errorMigracion.message);
     }
   }
 
@@ -148,6 +151,7 @@ const loginService = async ({ correo, password, rolesPermitidos }) => {
     };
   }
 
+  // 5. Cuenta de funcionario desactivada por el administrador (RF37)
   if (usuario.estado === "Desactivado") {
     return {
       error: "Su cuenta fue desactivada. Contacte al administrador.",
@@ -155,14 +159,7 @@ const loginService = async ({ correo, password, rolesPermitidos }) => {
     };
   }
 
-  if (usuario.passwordTemporal && usuario.passwordExpiredAt && usuario.passwordExpiredAt < now) {
-    return {
-      error: "Su contraseña temporal caducó. Contacte al administrador.",
-      statusCode: 401,
-    };
-  }
-
-  // 5. Verificar que la cuenta esté activa
+  // 6. Verificar que la cuenta esté activa
   if (usuario.estado !== "Activo") {
     return {
       error: "Acceso denegado. La cuenta no se encuentra activa.",
@@ -170,7 +167,15 @@ const loginService = async ({ correo, password, rolesPermitidos }) => {
     };
   }
 
-  // 6. Crear la sesión en la base de datos
+  // 7. La contraseña temporal del funcionario caduca a los 7 días (RF35)
+  if (usuario.passwordTemporal && usuario.passwordExpiredAt && usuario.passwordExpiredAt < now) {
+    return {
+      error: "Su contraseña temporal caducó. Contacte al administrador.",
+      statusCode: 401,
+    };
+  }
+
+  // 8. Crear la sesión en la base de datos
   const tempHash = `temp-${randomUUID()}`;
   const expiraAt = new Date(Date.now() + SESSION_MAX_MS);
 
@@ -211,6 +216,7 @@ const loginService = async ({ correo, password, rolesPermitidos }) => {
       rol: usuario.rol,
       carrera: usuario.carrera?.nombre || null,
       fotoUrl: usuario.fotoUrl,
+      // true = el front debe mostrar el cambio obligatorio de contraseña antes de cualquier pantalla (RF35)
       passwordTemporal: usuario.passwordTemporal,
     },
   };
@@ -222,6 +228,7 @@ export const loginAlumnoService = (credentials) =>
 export const loginFuncionarioService = (credentials) =>
   loginService({ ...credentials, rolesPermitidos: ["Funcionario"] });
 
+// Personal de la UBB (@ubiobio.cl): funcionarios y administradores entran por el mismo formulario
 export const loginPersonalService = (credentials) =>
   loginService({ ...credentials, rolesPermitidos: ["Funcionario", "Administrador"] });
 
