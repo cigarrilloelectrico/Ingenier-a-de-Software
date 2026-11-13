@@ -1,8 +1,8 @@
-import bcrypt from "bcryptjs";
 import { randomInt } from "node:crypto";
 import { prisma } from "../config/configDb.js";
 import { enviarPasswordTemporal } from "./email.service.js";
 import { verificarPoliticaPassword } from "../utils/passwordPolicy.js";
+import { hashearPassword } from "../utils/hashPassword.js";
 
 // Token numérico de 6 dígitos. randomInt usa un generador criptográfico: Math.random es predecible
 function generarClaveTemporal() {
@@ -63,7 +63,7 @@ export async function crearFuncionarioService(administradorId, { rut, nombre, ap
 
     //Generar la contraseña temporal: solo viaja al correo del funcionario, el administrador nunca la ve (RF35)
     const claveTemporal = generarClaveTemporal();
-    const passwordHash = await bcrypt.hash(claveTemporal, 10);
+    const passwordHash = await hashearPassword(claveTemporal);
 
     //Crear la cuenta, registrarla en la bitácora y enviar el correo juntos: si el correo falla, la cuenta no se crea
     return await prisma.$transaction(async (transaccion) => {
@@ -237,7 +237,7 @@ export async function cambiarPasswordTemporalService(usuarioId, sesionId, { pass
     }
 
     //Guardar la contraseña definitiva: la temporal queda invalidada de inmediato (RF35)
-    const passwordHash = await bcrypt.hash(passwordNueva, 10);
+    const passwordHash = await hashearPassword(passwordNueva);
 
     //Sigue trabajando en esta sesión; cualquier otra abierta con la temporal se cierra
     await prisma.$transaction(async (transaccion) => {

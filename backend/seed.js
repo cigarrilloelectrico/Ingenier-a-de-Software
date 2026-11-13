@@ -1,11 +1,11 @@
-import bcrypt from 'bcryptjs';
+import { hashearPassword } from './src/utils/hashPassword.js';
 import { prisma } from './src/config/configDb.js';
 
 async function main() {
   console.log('🌱 Cargando datos de prueba...');
-  const passwordHash = await bcrypt.hash('Alumno123!', 10);
-  const funcionarioPasswordHash = await bcrypt.hash('Funcionario123!', 10);
-  const administradorPasswordHash = await bcrypt.hash('Administrador123!', 10);
+  const passwordHash = await hashearPassword('Alumno123!');
+  const funcionarioPasswordHash = await hashearPassword('Funcionario123!');
+  const administradorPasswordHash = await hashearPassword('Administrador123!');
 
   // Las cuentas de administrador no se crean desde la plataforma (RF31): esta es la de desarrollo
   await prisma.usuario.upsert({

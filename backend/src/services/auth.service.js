@@ -6,6 +6,7 @@ import { prisma } from "../config/configDb.js";
 import { getJwtSecret, SESSION_MAX_MS, VERIFICATION_CODE_TTL_MS } from "../config/configEnv.js";
 import { hashToken } from "../middleware/auth.middleware.js";
 import { enviarCodigoVerificacion } from "./email.service.js";
+import { esHashAntiguo, hashearPassword, verificarPassword } from "../utils/hashPassword.js";
 
 const CODIGO_EXPIRACION_MS = VERIFICATION_CODE_TTL_MS;
 
@@ -86,13 +87,13 @@ const loginService = async ({ correo, password, rolesPermitidos }) => {
     };
   }
 
-  // 2. Validar existencia, rol permitido y contraseña con bcrypt
+  // 2. Validar existencia, rol permitido y contraseña (argon2, o bcrypt en cuentas antiguas)
   const tieneRolPermitido = usuario && rolesPermitidos.includes(usuario.rol);
   const tienePassword = Boolean(usuario?.passwordHash);
   let passwordValida = false;
 
   if (tieneRolPermitido && tienePassword) {
-    passwordValida = await bcrypt.compare(password, usuario.passwordHash);
+    passwordValida = await verificarPassword(password, usuario.passwordHash);
   }
 
   // Si falló el correo, el rol, la contraseña o la cuenta aún no está verificada
@@ -126,6 +127,19 @@ const loginService = async ({ correo, password, rolesPermitidos }) => {
       where: { usuarioId: usuario.usuarioId },
       data: { intentosFallidos: 0, bloqueoHastaAt: null },
     });
+  }
+
+  // La contraseña es correcta: si estaba guardada con bcrypt se regenera con argon2, sin que el usuario note nada.
+  // Solo si nadie la cambió en ese mismo instante (el where compara el hash leído), y si falla no impide entrar
+  if (esHashAntiguo(usuario.passwordHash)) {
+    try {
+      await prisma.usuario.updateMany({
+        where: { usuarioId: usuario.usuarioId, passwordHash: usuario.passwordHash },
+        data: { passwordHash: await hashearPassword(password) },
+      });
+    } catch (errorMigracion) {
+      console.error("No se pudo migrar la contraseña a argon2:", errorMigracion.message);
+    }
   }
 
   // 4. Excepción explícita de cuenta bloqueada
